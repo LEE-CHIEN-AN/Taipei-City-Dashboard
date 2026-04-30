@@ -5,7 +5,7 @@ ENV HF_HOME=/root/.cache/huggingface
 WORKDIR /w
 
 # 安裝匯出所需套件
-RUN pip install --no-cache-dir \
+RUN pip install --no-cache-dir --timeout 300 --retries 5 \
       "transformers>=4.44" \
       "optimum[onnxruntime]>=1.20.0" \
       onnxruntime
