@@ -5464,6 +5464,81 @@
 				"林育緹",
 				"tuic"
 			]
+		},
+		"165": {
+			"id": 165,
+			"index": "sidewalk_osm",
+			"map_config": [
+				{
+					"index": "pedestrian_osm_taipei",
+					"paint": {
+						"line-color": "#d4a85b",
+						"line-width": [
+							"interpolate", ["linear"], ["zoom"],
+							12, 0.8,
+							15, 2,
+							18, 4
+						],
+						"line-opacity": [
+							"interpolate", ["linear"], ["zoom"],
+							10, 0.5,
+							14, 0.85
+						]
+					},
+					"property": [
+						{"key": "highway", "name": "類型"},
+						{"key": "name",    "name": "名稱"},
+						{"key": "surface", "name": "路面"},
+						{"key": "lit",     "name": "照明"}
+					],
+					"type": "line",
+					"title": "人行道路網（臺北）"
+				},
+				{
+					"index": "pedestrian_osm_new_taipei",
+					"paint": {
+						"line-color": "#d4a85b",
+						"line-width": [
+							"interpolate", ["linear"], ["zoom"],
+							12, 0.8,
+							15, 2,
+							18, 4
+						],
+						"line-opacity": [
+							"interpolate", ["linear"], ["zoom"],
+							10, 0.5,
+							14, 0.85
+						]
+					},
+					"property": [
+						{"key": "highway", "name": "類型"},
+						{"key": "name",    "name": "名稱"},
+						{"key": "surface", "name": "路面"},
+						{"key": "lit",     "name": "照明"}
+					],
+					"type": "line",
+					"title": "人行道路網（新北）"
+				}
+			],
+			"map_filter": {},
+			"chart_config": {
+				"types": ["MapLegend"],
+				"color": ["#d4a85b"]
+			},
+			"chart_data": [
+				{"type": "line", "name": "人行道路網"}
+			],
+			"name": "雙北人行道路網圖資",
+			"source": "OpenStreetMap",
+			"time_from": "static",
+			"time_to": null,
+			"update_freq": null,
+			"update_freq_unit": null,
+			"short_desc": "雙北人行道路網分布，以線狀呈現人行道路徑。",
+			"long_desc": "資料來源為 OpenStreetMap，以線狀圖層呈現雙北人行道路網，包含人行道、行人徒步區、階梯及步道等，含路面、照明等屬性。",
+			"use_case": "可與事故熱點、公車站、捷運站等圖資套疊，分析步行環境的完整性與可及性。",
+			"links": ["https://www.openstreetmap.org/"],
+			"contributors": ["doit", "ntpc"]
 		}
 	}
 }
