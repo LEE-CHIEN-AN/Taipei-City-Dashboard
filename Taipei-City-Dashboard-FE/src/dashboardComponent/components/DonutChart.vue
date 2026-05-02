@@ -67,12 +67,10 @@ const chartOptions = ref({
 			? [...props.chart_config.color, "#848c94"]
 			: props.chart_config.color,
 	dataLabels: {
-		formatter: function (
-			_val,
-			{ seriesIndex, w }
-		) {
-			let value = w.globals.labels[seriesIndex];
-			return value.length > 7 ? value.slice(0, 6) + "..." : value;
+		formatter: function (val, { seriesIndex, w }) {
+			let label = w.globals.labels[seriesIndex];
+			let shortLabel = label.length > 5 ? label.slice(0, 4) + ".." : label;
+			return [shortLabel, Math.round(val) + "%"];
 		},
 	},
 	labels: parsedLabels,
@@ -96,21 +94,13 @@ const chartOptions = ref({
 	},
 	tooltip: {
 		followCursor: false,
-		custom: function ({
-			series,
-			seriesIndex,
-			w,
-		}) {
-			// The class "chart-tooltip" could be edited in /assets/styles/chartStyles.css
+		custom: function ({ series, seriesIndex, w }) {
+			const total = series.reduce((a, b) => a + b, 0);
+			const pct = total > 0 ? Math.round(series[seriesIndex] / total * 100) : 0;
 			return (
 				'<div class="chart-tooltip">' +
-				"<h6>" +
-				w.globals.labels[seriesIndex] +
-				"</h6>" +
-				"<span>" +
-				series[seriesIndex] +
-				` ${props.chart_config.unit}` +
-				"</span>" +
+				"<h6>" + w.globals.labels[seriesIndex] + "</h6>" +
+				"<span>" + series[seriesIndex] + ` ${props.chart_config.unit} (${pct}%)` + "</span>" +
 				"</div>"
 			);
 		},
