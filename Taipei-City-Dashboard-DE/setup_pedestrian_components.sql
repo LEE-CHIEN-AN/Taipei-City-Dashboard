@@ -307,6 +307,26 @@ INSERT INTO public.query_charts (
     'metrotaipei'
 );
 
+-- C4-taipei：臺北市版本
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+)
+SELECT
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, NOW(), NOW(),
+    query_type,
+    E'SELECT\n    COALESCE(\n        NULLIF(near_location, ''''),\n        ROUND(center_lng::numeric, 4)::text || '', '' || ROUND(center_lat::numeric, 4)::text\n    ) AS x_axis,\n    accident_count AS data\nFROM traffic_pedestrian_hotspot\nWHERE city = ''taipei''\nORDER BY accident_count DESC\nLIMIT 20',
+    query_history,
+    'taipei'
+FROM public.query_charts
+WHERE index = 'traffic_pedestrian_hotspot_ranking' AND city = 'metrotaipei'
+ON CONFLICT DO NOTHING;
 
 
 -- ============================================================
