@@ -515,9 +515,15 @@ export const useMapStore = defineStore("map", {
 			// Strip _day / _night / _diff suffix so suffixed indices reuse the same GeoJSON file
 			const geoJsonName = map_config.index.replace(/_(day|night|diff)$/, "");
 			axios
-				.get(`/mapData/${geoJsonName}.geojson`)
+				.get(`/mapData/${geoJsonName}.geojson`, {
+					headers: { "Cache-Control": "no-cache" },
+				})
 				.then((rs) => {
-					this.addGeojsonSource(map_config, rs.data);
+					const data =
+						typeof rs.data === "string"
+							? JSON.parse(rs.data)
+							: rs.data;
+					this.addGeojsonSource(map_config, data);
 				})
 				.catch((e) => console.error(e));
 		},
@@ -529,7 +535,7 @@ export const useMapStore = defineStore("map", {
 			) {
 				this.map.addSource(`${map_config.layerId}-source`, {
 					type: "geojson",
-					data: { ...data },
+					data: data,
 				});
 			}
 			if (map_config.type === "arc") {
@@ -1869,7 +1875,6 @@ export const useMapStore = defineStore("map", {
 			);
 			return;
 		},
-		//  5. Turn on the visibility for a exisiting map layer
 		turnOnMapLayerVisibility(mapLayerId) {
 			if (mapLayerId.indexOf("-arc") !== -1) {
 				this.deckGlLayer[mapLayerId].config.visible = true;
