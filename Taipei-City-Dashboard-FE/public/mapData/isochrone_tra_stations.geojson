@@ -1,0 +1,215 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.66758,
+          25.07799
+        ]
+      },
+      "properties": {
+        "name": "五堵",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.66113,
+          25.0679
+        ]
+      },
+      "properties": {
+        "name": "汐止",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.65233,
+          25.06406
+        ]
+      },
+      "properties": {
+        "name": "汐科",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.60706,
+          25.05348
+        ]
+      },
+      "properties": {
+        "name": "南港",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.57906,
+          25.04927
+        ]
+      },
+      "properties": {
+        "name": "松山",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.51711,
+          25.04775
+        ]
+      },
+      "properties": {
+        "name": "台北",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.49996,
+          25.03339
+        ]
+      },
+      "properties": {
+        "name": "萬華",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.46377,
+          25.01434
+        ]
+      },
+      "properties": {
+        "name": "板橋",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.44477,
+          25.00419
+        ]
+      },
+      "properties": {
+        "name": "浮洲",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.42442,
+          24.99123
+        ]
+      },
+      "properties": {
+        "name": "樹林",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.40884,
+          24.98044
+        ]
+      },
+      "properties": {
+        "name": "南樹林",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.39254,
+          24.97273
+        ]
+      },
+      "properties": {
+        "name": "山佳",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.35517,
+          24.95455
+        ]
+      },
+      "properties": {
+        "name": "鶯歌",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.33658,
+          24.97268
+        ]
+      },
+      "properties": {
+        "name": "鳳鳴",
+        "city": "newtaipei",
+        "type": "tra"
+      }
+    }
+  ]
+}
