@@ -145,6 +145,27 @@ INSERT INTO public.query_charts (
     'metrotaipei'
 );
 
+-- C1-taipei：臺北市版本（下拉選單用）
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+)
+SELECT
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, NOW(), NOW(),
+    'two_d',
+    E'SELECT district_name AS x_axis, SUM(accident_count)::INT AS data\nFROM traffic_pedestrian_district_stats\nWHERE city_name = ''臺北市''\nGROUP BY district_name\nORDER BY x_axis',
+    NULL,
+    'taipei'
+FROM public.query_charts
+WHERE index = 'traffic_pedestrian_heatmap' AND city = 'metrotaipei'
+ON CONFLICT DO NOTHING;
+
 -- C2：雙北行人事故時段分析（三個 city 版本，對應後端 query_charts.city 篩選）
 
 -- 共用 SQL 片段（CASE weekday）抽出為說明，實際各版本重複寫入
