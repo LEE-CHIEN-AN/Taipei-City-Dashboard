@@ -27,38 +27,6 @@ const dialogStore = useDialogStore();
 const mapStore = useMapStore();
 const route = useRoute();
 
-const isochroneOptions = [
-  { label: "全部", value: null },
-  { label: "5 分鐘", value: 5 },
-  { label: "10 分鐘", value: 10 },
-  { label: "15 分鐘", value: 15 },
-];
-
-function isIsochroneComponent(item) {
-  return item.index?.startsWith("transit_isochrone");
-}
-
-function getIsochroneChartData(item) {
-  const minutes = mapStore.isochroneMinutes;
-  const data = item.chart_data;
-  const categories = item.chart_config?.categories;
-  if (!data || !categories || !Array.isArray(data) || data.length === 0) return null;
-
-  const s5  = data.find(s => s.name === '5分鐘')?.data  || [];
-  const s10 = data.find(s => s.name === '10分鐘')?.data || [];
-  const s15 = data.find(s => s.name === '15分鐘')?.data || [];
-
-  let values;
-  if (minutes === 5) {
-    values = s5;
-  } else if (minutes === 10) {
-    values = s5.map((v, i) => (v || 0) + (s10[i] || 0));
-  } else {
-    values = s5.map((v, i) => (v || 0) + (s10[i] || 0) + (s15[i] || 0));
-  }
-
-  return [{ data: categories.map((cat, i) => ({ x: cat, y: Math.round(values[i] || 0) })) }];
-}
 
 const toggleOn = ref({
 	hasMap: [],
@@ -207,9 +175,6 @@ function popularBasicLayerGA(map_config) {
           "
           :toggle-disable="shouldDisable(item.map_config)"
           :toggle-on="toggleOn.mapLayer[arrayIdx]"
-          :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
-          :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
-          :chart-data-override="isIsochroneComponent(item) ? getIsochroneChartData(item) : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);
@@ -245,11 +210,6 @@ function popularBasicLayerGA(map_config) {
           @clear-by-layer-filter="
             (map_config) => {
               mapStore.clearByLayerFilter(map_config);
-            }
-          "
-          @filter-change="
-            (v) => {
-              if (isIsochroneComponent(item)) mapStore.setIsochroneFilter(v);
             }
           "
           @change-city="
@@ -330,9 +290,6 @@ function popularBasicLayerGA(map_config) {
           "
           :toggle-disable="shouldDisable(item.map_config)"
           :toggle-on="toggleOn.hasMap[arrayIdx]"
-          :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
-          :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
-          :chart-data-override="isIsochroneComponent(item) ? getIsochroneChartData(item) : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);
@@ -373,11 +330,6 @@ function popularBasicLayerGA(map_config) {
           @fly="
             (location) => {
               mapStore.flyToLocation(location);
-            }
-          "
-          @filter-change="
-            (v) => {
-              if (isIsochroneComponent(item)) mapStore.setIsochroneFilter(v);
             }
           "
           @change-city="

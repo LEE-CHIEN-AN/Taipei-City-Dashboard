@@ -64,8 +64,6 @@ export const useMapStore = defineStore("map", {
 		currentLayers: [],
 		// Array of layer IDs that are in the map and currently visible
 		currentVisibleLayers: [],
-		// 等時圈時間篩選（null = 全顯示, 5/10/15 = 只顯示該時間帶）
-		isochroneMinutes: null,
 		// Stores all map configs for all layers (to be used to render popups)
 		mapConfigs: {},
 		// Stores the mapbox map instance
@@ -440,15 +438,6 @@ export const useMapStore = defineStore("map", {
 					) {
 						this.currentVisibleLayers.push(mapLayerId);
 					}
-					if (
-						this.isochroneMinutes &&
-						mapLayerId.startsWith("isochrone_") &&
-						this.map?.getLayer(mapLayerId)
-					) {
-						this.map.setFilter(mapLayerId, [
-							"==", ["get", "minutes"], this.isochroneMinutes,
-						]);
-					}
 					return;
 				}
 				let appendLayer = { ...element };
@@ -496,13 +485,6 @@ export const useMapStore = defineStore("map", {
 				this.AddIsolineMapLayer(map_config, data);
 			} else {
 				this.addMapLayer(map_config);
-				// 若目前有等時圈時間篩選，重新套用至所有可見等時圈圖層（含剛加入的）
-				if (
-					this.isochroneMinutes &&
-					map_config.layerId?.startsWith("isochrone_")
-				) {
-					this.setIsochroneFilter(this.isochroneMinutes);
-				}
 			}
 		},
 		// 3-2. Add a raster map as a source in mapbox
@@ -1826,20 +1808,6 @@ export const useMapStore = defineStore("map", {
 				(el) => el !== map_config.layerId,
 			);
 			return;
-		},
-		//  5. Turn on the visibility for a exisiting map layer
-		setIsochroneFilter(minutes) {
-			this.isochroneMinutes = minutes;
-			const filter = minutes
-				? ["==", ["get", "minutes"], minutes]
-				: null;
-			this.currentVisibleLayers
-				.filter((id) => id.startsWith("isochrone_"))
-				.forEach((id) => {
-					if (this.map && this.map.getLayer(id)) {
-						this.map.setFilter(id, filter);
-					}
-				});
 		},
 		turnOnMapLayerVisibility(mapLayerId) {
 			if (mapLayerId.indexOf("-arc") !== -1) {

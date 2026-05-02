@@ -20,6 +20,7 @@ const props = defineProps([
 	"map_config",
 	"map_filter",
 	"map_filter_on",
+	"activeChart",
 ]);
 const emits = defineEmits([
 	"filterByParam",
@@ -92,7 +93,10 @@ function handleDataSelection(index) {
 </script>
 
 <template>
-  <div class="maplegend">
+  <div
+    v-if="!activeChart || activeChart === 'MapLegend'"
+    class="maplegend"
+  >
     <div class="maplegend-legend">
       <button
         v-for="(item, index) in series"

@@ -5,6 +5,21 @@
 
 ---
 
+## 終端機說明
+
+本文件所有指令都在 **PowerShell** 執行。如果你看到的 prompt 長這樣：
+
+```
+(base) PS C:\Users\你的名字\Desktop\Taipei-City-Dashboard>
+```
+
+代表你用的是 **Anaconda 的 PowerShell**，`(base)` 是 conda 環境名稱，不影響操作。  
+直接把指令貼到 `>` 後面按 Enter 即可，不需要切換終端機。
+
+> 注意：本文件的指令使用 `docker cp` 而非 `<` 重導向，原因是 PowerShell 的 `<` 會造成中文亂碼，`docker cp` 方式相容所有 Windows 終端機。
+
+---
+
 ## 一、拉最新程式碼
 
 ```powershell
@@ -22,7 +37,8 @@ git pull origin feature/transit-isochrone
 > dump 本身會自動建表，不需要先跑 setup_pedestrian_tables.sql
 
 ```powershell
-docker exec -i postgres-data psql -U postgres -d dashboard < Taipei-City-Dashboard-DE/pedestrian_all.sql
+docker cp Taipei-City-Dashboard-DE/pedestrian_all.sql postgres-data:/tmp/pedestrian_all.sql
+docker exec postgres-data psql -U postgres -d dashboard -f /tmp/pedestrian_all.sql
 ```
 
 看到下面這樣就成功了（有些 `already exists` 警告可以忽略）：
@@ -37,7 +53,8 @@ COPY 12
 ### 2-2. 設定儀表板組件
 
 ```powershell
-docker exec -i postgres-manager psql -U postgres -d dashboardmanager < Taipei-City-Dashboard-DE/setup_pedestrian_components.sql
+docker cp Taipei-City-Dashboard-DE/setup_pedestrian_components.sql postgres-manager:/tmp/setup_ped.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_ped.sql
 ```
 
 ---
@@ -47,7 +64,8 @@ docker exec -i postgres-manager psql -U postgres -d dashboardmanager < Taipei-Ci
 ### 3-1. 設定組件（地圖層 + 圖表）
 
 ```powershell
-docker exec -i postgres-manager psql -U postgres -d dashboardmanager < Taipei-City-Dashboard-DE/setup_isochrone_components.sql
+docker cp Taipei-City-Dashboard-DE/setup_isochrone_components.sql postgres-manager:/tmp/setup_iso.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_iso.sql
 ```
 
 ### 3-2. 計算各行政區覆蓋率並寫入 DB
@@ -88,6 +106,19 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
 
 ---
 
+## 已跑過的人：如何更新到最新版本
+
+```powershell
+git pull origin feature/transit-isochrone
+docker cp Taipei-City-Dashboard-DE/setup_isochrone_components.sql postgres-manager:/tmp/setup_iso.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_iso.sql
+docker restart dashboard-fe
+```
+
+再按 **Ctrl+Shift+R** 重整瀏覽器即可看到最新版本。
+
+---
+
 ## 常見問題
 
 **Q：跑 pedestrian_all.sql 出現 `already exists` 錯誤？**
@@ -115,3 +146,6 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
 **Q：`compute_isochrone_coverage.py` 連不上 DB？**
 - 確認 Docker 有在跑：`docker ps`
 - 確認 `docker/.env` 裡有 `DB_DASHBOARD_PASSWORD`
+
+**Q：ColumnChart 疊加順序錯誤（5分鐘不在底層）？**
+- 重新跑 step 3-1 的 `setup_isochrone_components.sql` 即可

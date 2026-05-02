@@ -96,7 +96,17 @@ const emits = defineEmits([
 	"filterChange",
 ]);
 
-const activeChart = ref(props.config.chart_config.types[0]);
+const displayTypes = computed(() => {
+	const types = props.config.chart_config.types;
+	if (!types.includes('MapLegend')) return types;
+	if (props.mode.includes('map')) {
+		return ['MapLegend', ...types.filter(t => t !== 'MapLegend')];
+	} else {
+		return [...types.filter(t => t !== 'MapLegend'), 'MapLegend'];
+	}
+});
+
+const activeChart = ref(displayTypes.value[0]);
 const activeCity = computed({
 	get: () => props.activeCity,
 	set: (value) => {
@@ -371,7 +381,7 @@ function returnChartComponent(name, svg) {
         class="dashboardcomponent-control-group"
       >
         <button
-          v-for="item in config.chart_config.types"
+          v-for="item in displayTypes"
           :key="`${config.index}-${item}-button`"
           :class="{
             'dashboardcomponent-control-group-button': true,
@@ -443,7 +453,7 @@ function returnChartComponent(name, svg) {
     >
       <component
         :is="returnChartComponent(item)"
-        v-for="item in config.chart_config.types"
+        v-for="item in displayTypes"
         :key="`${props.config.index}-${item}-chart-${item.city}`"
         :active-chart="activeChart"
         :active-city="activeCity"
@@ -725,7 +735,6 @@ button:hover {
 		row-gap: 6px;
 
 		&-filter {
-			width: 100%;
 			display: flex;
 			justify-content: center;
 			align-items: center;
