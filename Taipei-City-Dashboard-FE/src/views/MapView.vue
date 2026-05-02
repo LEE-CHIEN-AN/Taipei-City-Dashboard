@@ -27,6 +27,7 @@ const dialogStore = useDialogStore();
 const mapStore = useMapStore();
 const route = useRoute();
 
+
 const toggleOn = ref({
 	hasMap: [],
 	noMap: [],
@@ -77,7 +78,7 @@ function handleOpenSettings() {
 }
 
 // Open and closes the component as well as communicates to the mapStore to turn on and off map layers
-function handleToggle(value, map_config) {
+function handleToggle(value, map_config, component) {
 	if (!map_config[0]) {
 		if (value) {
 			dialogStore.showNotification(
@@ -89,11 +90,50 @@ function handleToggle(value, map_config) {
 	}
 	if (value) {
 		mapStore.addToMapLayerList(map_config);
+		scheduleChoroplethForComponent(component);
 	} else {
 		mapStore.clearByParamFilter(map_config);
 		mapStore.turnOffMapLayerVisibility(map_config);
 	}
 }
+
+// Schedule choropleth for all eligible fill layers in a component.
+// A fill layer is eligible when it has TNAME in its property and the component has district-level categories.
+function scheduleChoroplethForComponent(component) {
+	if (!component?.chart_data?.[0]?.data || !component?.chart_config?.categories?.length) return;
+	const categories = component.chart_config.categories;
+	const values = component.chart_data[0].data;
+	const isDiff = !!component.index?.includes("diff");
+	component.map_config?.forEach((el) => {
+		if (el.type !== "fill") return;
+		const prop = Array.isArray(el.property) ? el.property : [];
+		if (!prop.some((p) => p.key === "TNAME")) return;
+		const layerId = `${el.index}-${el.type}-${el.city}`;
+		if (isDiff) {
+			mapStore.scheduleChoropleth(layerId, "TNAME", categories, values, {
+				mode: "diff",
+				dayColor: "#F5A623",
+				nightColor: "#24B0DD",
+			});
+		} else {
+			const fillColor = (el.paint && el.paint["fill-color"]) || "#3B82F6";
+			mapStore.scheduleChoropleth(layerId, "TNAME", categories, values, {
+				mode: "regular",
+				fillColor,
+			});
+		}
+	});
+}
+
+// Re-apply choropleth when chart_data is refreshed (e.g. after city switch).
+// Watch the entire components array with deep:true so nested chart_data changes are detected.
+watch(
+	() => contentStore.currentDashboard.components,
+	(components) => {
+		components?.forEach((component) => scheduleChoroplethForComponent(component));
+	},
+	{ deep: true },
+);
 
 function toggleSwitchBtn(value, Btn, BtnIndex) {
 	toggleOn.value[Btn][BtnIndex] = value;
@@ -192,7 +232,7 @@ function getAvailableCities(componentIndex) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'mapLayer', arrayIdx);
               popularThematicLayerGA(map_config);
             }
@@ -236,12 +276,12 @@ function getAvailableCities(componentIndex) {
                   },
                 );
 
-              const componentIndex =
-                contentStore.currentDashboard.components.findIndex(
-                  (item) => item.id === selectedData.id,
-                );
-
               if (selectedData) {
+                const componentIndex =
+                  contentStore.currentDashboard.components.findIndex(
+                    (comp) => comp.id === item.id,
+                  );
+
                 mapStore.clearByParamFilter(item.map_config);
                 mapStore.turnOffMapLayerVisibility(
                   item.map_config,
@@ -292,7 +332,7 @@ function getAvailableCities(componentIndex) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'hasMap', arrayIdx);
               popularThematicLayerGA(map_config);
             }
@@ -341,12 +381,12 @@ function getAvailableCities(componentIndex) {
                   },
                 );
 
-              const componentIndex =
-                contentStore.currentDashboard.components.findIndex(
-                  (item) => item.id === selectedData.id,
-                );
-
               if (selectedData) {
+                const componentIndex =
+                  contentStore.currentDashboard.components.findIndex(
+                    (comp) => comp.id === item.id,
+                  );
+
                 mapStore.clearByParamFilter(item.map_config);
                 mapStore.turnOffMapLayerVisibility(
                   item.map_config,
@@ -398,7 +438,7 @@ function getAvailableCities(componentIndex) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'basicLayer', arrayIdx);
               popularBasicLayerGA(map_config);
             }
@@ -461,7 +501,7 @@ function getAvailableCities(componentIndex) {
         <!-- Full-width noMap: HeatmapChart needs more vertical space -->
         <template
           v-for="(item, arrayIdx) in parseMapLayers.noMap"
-          :key="`map-layer-full-${item.index}-${item.city}`"
+            :key="`map-layer-full-${item.index}-${item.city}`"
         >
           <DashboardComponent
             v-if="item.chart_config?.types?.includes('HeatmapChart')"
@@ -487,7 +527,7 @@ function getAvailableCities(componentIndex) {
             "
             @toggle="
               (value, map_config) => {
-                handleToggle(value, map_config);
+                handleToggle(value, map_config, item);
                 toggleSwitchBtn(value, 'noMap', arrayIdx);
               }
             "
@@ -510,6 +550,7 @@ function getAvailableCities(componentIndex) {
                       data.index === item.index &&
                       data.city === item.city,
                   );
+
                 if (selectedData && componentIndex !== -1) {
                   contentStore.setComponentData(
                     componentIndex,
@@ -556,7 +597,7 @@ function getAvailableCities(componentIndex) {
               "
               @toggle="
                 (value, map_config) => {
-                  handleToggle(value, map_config);
+                  handleToggle(value, map_config, item);
                   toggleSwitchBtn(value, 'noMap', arrayIdx);
                 }
               "
@@ -637,6 +678,7 @@ function getAvailableCities(componentIndex) {
 	height: calc(var(--vh) * 100 - 127px);
 	display: flex;
 	margin: var(--font-m) var(--font-m);
+	position: relative;
 
 	&-charts {
 		width: 460px;

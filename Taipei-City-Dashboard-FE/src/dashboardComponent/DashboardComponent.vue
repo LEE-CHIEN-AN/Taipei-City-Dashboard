@@ -76,6 +76,9 @@ const props = defineProps({
 	footer: { type: Boolean, default: true },
 	activeCity: { type: String, default: '' },
 	toggleOn: { type: Boolean, default: false },
+	filterButtons: { type: Array, default: () => [] },
+	filterValue: { type: [Number, String, null], default: null },
+	chartDataOverride: { type: Array, default: null },
 });
 
 const emits = defineEmits([
@@ -89,10 +92,21 @@ const emits = defineEmits([
 	"clearByParamFilter",
 	"clearByLayerFilter",
 	"fly",
-	"changeCity"
+	"changeCity",
+	"filterChange",
 ]);
 
-const activeChart = ref(props.config.chart_config.types[0]);
+const displayTypes = computed(() => {
+	const types = props.config.chart_config.types;
+	if (!types.includes('MapLegend')) return types;
+	if (props.mode.includes('map')) {
+		return ['MapLegend', ...types.filter(t => t !== 'MapLegend')];
+	} else {
+		return [...types.filter(t => t !== 'MapLegend'), 'MapLegend'];
+	}
+});
+
+const activeChart = ref(displayTypes.value[0]);
 const activeCity = computed({
 	get: () => props.activeCity,
 	set: (value) => {
@@ -367,7 +381,7 @@ function returnChartComponent(name, svg) {
         class="dashboardcomponent-control-group"
       >
         <button
-          v-for="item in config.chart_config.types"
+          v-for="item in displayTypes"
           :key="`${config.index}-${item}-button`"
           :class="{
             'dashboardcomponent-control-group-button': true,
@@ -376,6 +390,22 @@ function returnChartComponent(name, svg) {
           @click="changeActiveChart(item)"
         >
           {{ chartTypes[item] }}
+        </button>
+      </div>
+      <div
+        v-if="filterButtons.length > 0"
+        class="dashboardcomponent-control-filter"
+      >
+        <button
+          v-for="opt in filterButtons"
+          :key="String(opt.value)"
+          :class="{
+            'dashboardcomponent-control-group-button': true,
+            'dashboardcomponent-control-group-active': filterValue === opt.value,
+          }"
+          @click="$emit('filterChange', opt.value)"
+        >
+          {{ opt.label }}
         </button>
       </div>
     </div>
@@ -423,12 +453,12 @@ function returnChartComponent(name, svg) {
     >
       <component
         :is="returnChartComponent(item)"
-        v-for="item in config.chart_config.types"
+        v-for="item in displayTypes"
         :key="`${props.config.index}-${item}-chart-${item.city}`"
         :active-chart="activeChart"
         :active-city="activeCity"
         :chart_config="config.chart_config"
-        :series="config.chart_data"
+        :series="chartDataOverride !== null ? chartDataOverride : config.chart_data"
         :map_config="config.map_config"
         :map_filter="config.map_filter"
         :map_filter_on="mode.includes('map')"
@@ -694,6 +724,7 @@ button:hover {
 	&-control {
 		width: 100%;
 		display: flex;
+		flex-wrap: wrap;
 		// justify-content: center;
 		align-items: center;
 		// position: absolute;
@@ -701,6 +732,14 @@ button:hover {
 		left: 0;
 		z-index: 8;
 		padding: 8px 0;
+		row-gap: 6px;
+
+		&-filter {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 4px;
+		}
 
 		&-group {
 			display: flex;
