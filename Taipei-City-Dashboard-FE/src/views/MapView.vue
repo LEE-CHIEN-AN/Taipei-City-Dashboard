@@ -27,6 +27,17 @@ const dialogStore = useDialogStore();
 const mapStore = useMapStore();
 const route = useRoute();
 
+const isochroneOptions = [
+  { label: "全部", value: null },
+  { label: "5 分鐘", value: 5 },
+  { label: "10 分鐘", value: 10 },
+  { label: "15 分鐘", value: 15 },
+];
+
+const hasActiveIsochrone = computed(() =>
+  mapStore.currentVisibleLayers.some((id) => id.startsWith("isochrone_"))
+);
+
 const toggleOn = ref({
 	hasMap: [],
 	noMap: [],
@@ -247,6 +258,21 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
+        <!-- 步行時間篩選器 -->
+        <div
+          v-if="hasActiveIsochrone"
+          class="isochrone-walk-filter"
+        >
+          <p class="isochrone-walk-filter-label">步行時間篩選</p>
+          <div class="isochrone-walk-filter-buttons">
+            <button
+              v-for="opt in isochroneOptions"
+              :key="opt.value"
+              :class="['isochrone-walk-filter-btn', { active: mapStore.isochroneMinutes === opt.value }]"
+              @click="mapStore.setIsochroneFilter(opt.value)"
+            >{{ opt.label }}</button>
+          </div>
+        </div>
       </div>
       <!-- 2. Dashboards that have components -->
       <div
@@ -367,6 +393,21 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
+        <!-- 步行時間篩選器 -->
+        <div
+          v-if="hasActiveIsochrone"
+          class="isochrone-walk-filter"
+        >
+          <p class="isochrone-walk-filter-label">步行時間篩選</p>
+          <div class="isochrone-walk-filter-buttons">
+            <button
+              v-for="opt in isochroneOptions"
+              :key="opt.value"
+              :class="['isochrone-walk-filter-btn', { active: mapStore.isochroneMinutes === opt.value }]"
+              @click="mapStore.setIsochroneFilter(opt.value)"
+            >{{ opt.label }}</button>
+          </div>
+        </div>
         <h2 v-if="contentStore.mapLayers.length > 0">
           基本圖層
         </h2>
@@ -584,6 +625,7 @@ function popularBasicLayerGA(map_config) {
 	height: calc(var(--vh) * 100 - 127px);
 	display: flex;
 	margin: var(--font-m) var(--font-m);
+	position: relative;
 
 	&-charts {
 		width: 360px;
@@ -646,6 +688,45 @@ function popularBasicLayerGA(map_config) {
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+.isochrone-walk-filter {
+	background: var(--color-component-background);
+	border-radius: 5px;
+	padding: var(--font-m);
+
+	&-label {
+		font-size: 0.75rem;
+		color: var(--color-complement-text);
+		margin-bottom: 0.5rem;
+	}
+
+	&-buttons {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+
+	&-btn {
+		font-size: 0.75rem;
+		padding: 0.25rem 0.65rem;
+		border-radius: 1rem;
+		border: 1px solid var(--color-border);
+		background: transparent;
+		color: var(--color-complement-text);
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+
+		&:hover {
+			background: var(--color-border);
+		}
+
+		&.active {
+			background: var(--color-highlight);
+			color: white;
+			border-color: var(--color-highlight);
+		}
 	}
 }
 </style>

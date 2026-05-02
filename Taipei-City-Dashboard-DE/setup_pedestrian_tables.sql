@@ -97,3 +97,13 @@ CREATE TABLE IF NOT EXISTS public.traffic_pedestrian_yearly_trend (
 );
 CREATE INDEX IF NOT EXISTS idx_ped_trend_city_year
     ON public.traffic_pedestrian_yearly_trend(city, year);
+
+-- 雙北行政區邊界（來源：metrotaipei_town.geojson，供 DistrictChart spatial join 使用）
+CREATE TABLE IF NOT EXISTS public.metro_district_boundaries (
+    id SERIAL PRIMARY KEY,
+    city_name VARCHAR(20),
+    district_name VARCHAR(20),
+    geom GEOMETRY(MultiPolygon, 4326)
+);
+CREATE INDEX IF NOT EXISTS idx_metro_district_geom
+    ON public.metro_district_boundaries USING GIST(geom);

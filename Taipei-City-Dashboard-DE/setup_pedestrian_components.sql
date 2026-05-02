@@ -22,7 +22,7 @@ ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 INSERT INTO public.component_charts (index, color, types, unit) VALUES
     ('traffic_pedestrian_heatmap',
         ARRAY['#FFF9C4', '#FFB300', '#E65100', '#B71C1C'],
-        ARRAY['MapLegend'],
+        ARRAY['DistrictChart'],
         '件'),
     ('traffic_pedestrian_hourly_taipei',
         ARRAY['#FFF9C4', '#FF6F00', '#B71C1C'],
@@ -107,7 +107,10 @@ INSERT INTO public.component_maps (index, title, type, source, size, icon, paint
 --    再將結果填入下方 ARRAY[?] 中
 -- ============================================================
 
--- C1：雙北行人事故熱區地圖 (metrotaipei)
+-- C1：雙北行人事故熱區（DistrictChart，三城市版本）
+-- 注意：metro_district_boundaries 表須先由 setup_pedestrian_tables.sql 建立並匯入 metrotaipei_town.geojson 資料
+
+-- 台北市分區
 INSERT INTO public.query_charts (
     index, history_config, map_config_ids, map_filter,
     time_from, time_to, update_freq, update_freq_unit,
@@ -117,27 +120,70 @@ INSERT INTO public.query_charts (
 ) VALUES (
     'traffic_pedestrian_heatmap',
     NULL,
-    -- 將 ? 替換為 component_maps 實際 id
-    -- e.g. ARRAY[102] 若上方 INSERT 後 id=102
     (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap' LIMIT 1),
     '{}',
-    'year_start',
-    'now',
-    1,
-    'year',
+    'year_start', 'now', 1, 'year',
     '警察局交通大隊、內政部警政署',
-    '雙北近三年行人事故熱點分布地圖，顏色深淺代表事故密度。',
-    '以圓點密度呈現臺北市與新北市近三年行人事故的空間分布。每個點代表約 100 公尺範圍內的事故聚合，顏色越深、圓點越大代表事故件數越多。可快速識別高風險路段與路口，輔助交通安全政策規劃。',
-    '識別行人事故黑點，輔助交通安全政策改善規劃。可與人行道設施、路口型態、號誌設計等圖資套疊分析。',
-    ARRAY[
-        'https://data.taipei/dataset/detail?id=2f238b4f-1b27-4085-93e9-d684ef0e2735',
-        'https://data.gov.tw/dataset/13139'
-    ],
+    '台北市各行政區行人事故件數（2022年起）。',
+    '以台北市各行政區為單位，統計2022年以來的行人事故件數，展示事故熱點分布。',
+    '識別事故最多的行政區，輔助政策改善優先順序規劃。',
+    ARRAY['https://data.taipei/dataset/detail?id=2f238b4f-1b27-4085-93e9-d684ef0e2735'],
     ARRAY['b12705030'],
-    NOW(),
-    NOW(),
-    'map_legend',
-    E'SELECT\n    unnest(ARRAY[''1-4件（低）'', ''5-9件（中）'', ''10-19件（高）'', ''20件以上（極高）'']) AS name,\n    NULL::float AS value,\n    ''circle'' AS type',
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT b.district_name AS x_axis, COUNT(*)::float AS data\nFROM traffic_pedestrian_accident_taipei a\nJOIN metro_district_boundaries b\n    ON ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(a.lng, a.lat), 4326))\nWHERE a.year >= 2022 AND b.city_name = ''臺北市''\nGROUP BY b.district_name\nORDER BY data DESC',
+    NULL,
+    'taipei'
+);
+
+-- 新北市分區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'traffic_pedestrian_heatmap',
+    NULL,
+    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap' LIMIT 1),
+    '{}',
+    'year_start', 'now', 1, 'year',
+    '內政部警政署',
+    '新北市各行政區行人事故件數（2022年起）。',
+    '以新北市各行政區為單位，統計2022年以來的行人事故件數，展示事故熱點分布。',
+    '識別事故最多的行政區，輔助政策改善優先順序規劃。',
+    ARRAY['https://data.gov.tw/dataset/13139'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT b.district_name AS x_axis, COUNT(*)::float AS data\nFROM traffic_pedestrian_accident_ntpc a\nJOIN metro_district_boundaries b\n    ON ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(a.lng, a.lat), 4326))\nWHERE a.year >= 2022 AND b.city_name = ''新北市''\nGROUP BY b.district_name\nORDER BY data DESC',
+    NULL,
+    'newtaipei'
+);
+
+-- 雙北合計分區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'traffic_pedestrian_heatmap',
+    NULL,
+    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap' LIMIT 1),
+    '{}',
+    'year_start', 'now', 1, 'year',
+    '警察局交通大隊、內政部警政署',
+    '雙北各行政區行人事故件數（2022年起）。',
+    '以雙北各行政區為單位，統計2022年以來的行人事故件數，展示事故熱點分布。',
+    '識別事故最多的行政區，輔助政策改善優先順序規劃。',
+    ARRAY['https://data.taipei/dataset/detail?id=2f238b4f-1b27-4085-93e9-d684ef0e2735','https://data.gov.tw/dataset/13139'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT x_axis, SUM(data)::float AS data FROM (\n    SELECT b.district_name AS x_axis, COUNT(*)::float AS data\n    FROM traffic_pedestrian_accident_taipei a\n    JOIN metro_district_boundaries b\n        ON ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(a.lng, a.lat), 4326))\n    WHERE a.year >= 2022\n    GROUP BY b.district_name\n    UNION ALL\n    SELECT b.district_name AS x_axis, COUNT(*)::float AS data\n    FROM traffic_pedestrian_accident_ntpc a\n    JOIN metro_district_boundaries b\n        ON ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(a.lng, a.lat), 4326))\n    WHERE a.year >= 2022\n    GROUP BY b.district_name\n) combined\nGROUP BY x_axis\nORDER BY data DESC',
     NULL,
     'metrotaipei'
 );
