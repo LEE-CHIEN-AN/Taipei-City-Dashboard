@@ -9,7 +9,9 @@ import_arcade_csv.py
 
 執行前請確認：
   1. setup_arcade_tables.sql 已在 postgres-data DB 執行完畢
-  2. 環境變數已設定（或直接修改下方 DB_CONFIG）
+  2. 已安裝 psycopg2-binary：
+       pip install psycopg2-binary
+  3. 環境變數已設定（或直接修改下方 DB_CONFIG）
 
 Usage:
   python import_arcade_csv.py
@@ -17,7 +19,16 @@ Usage:
 
 import os
 import csv
-import psycopg2
+
+try:
+    import psycopg2
+except ImportError:
+    raise SystemExit(
+        "[ERROR] 找不到 psycopg2 模組。請先執行：\n"
+        "  pip install psycopg2-binary\n"
+        "若使用 conda 環境：\n"
+        "  conda install -c conda-forge psycopg2"
+    )
 
 # ── DB 連線設定 ────────────────────────────────────────────────
 DB_CONFIG = {
