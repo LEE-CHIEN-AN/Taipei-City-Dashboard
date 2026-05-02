@@ -51,7 +51,39 @@ INSERT INTO public.query_charts (
     ARRAY['b12705030'],
     NOW(), NOW(),
     'two_d',
-    E'SELECT weather AS x_axis, count::INT AS data\nFROM public.ped_accident_weather_stats\nORDER BY count DESC',
+    E'SELECT weather AS x_axis, count::INT AS data\nFROM public.ped_accident_weather_stats\nWHERE city = ''metrotaipei''\nORDER BY count DESC',
+    NULL,
+    'metrotaipei'
+),
+(
+    'traffic_pedestrian_weather',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '內政部警政署',
+    '2026年1-4月臺北市人與車事故的天氣分布。',
+    '以圓餅圖呈現 2026 年 1–4 月臺北市「人與車」類事故發生當下的天氣條件比例。',
+    '了解天氣對行人事故的影響，協助決策雨天執法或道路防滑設施規劃。',
+    ARRAY['https://data.gov.tw/dataset/13139'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT weather AS x_axis, count::INT AS data\nFROM public.ped_accident_weather_stats\nWHERE city = ''taipei''\nORDER BY count DESC',
+    NULL,
+    'taipei'
+),
+(
+    'traffic_pedestrian_subtype',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '內政部警政署',
+    '2026年1-4月雙北人與車事故類型細項比例。',
+    '以圓餅圖呈現 2026 年 1–4 月台北市與新北市「人與車」類事故中各細項型態的比例分布。',
+    '識別最危險的行人行為情境，作為行人安全教育宣導與設施改善的依據。',
+    ARRAY['https://data.gov.tw/dataset/13139'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT subtype AS x_axis, count::INT AS data\nFROM public.ped_accident_subtype_stats\nWHERE city = ''metrotaipei''\nORDER BY count DESC',
     NULL,
     'metrotaipei'
 ),
@@ -60,16 +92,16 @@ INSERT INTO public.query_charts (
     NULL, '{}', '{}',
     'static', NULL, 1, 'year',
     '內政部警政署',
-    '2026年1-4月雙北人與車事故類型細項比例。',
-    '以圓餅圖呈現 2026 年 1–4 月台北市與新北市「人與車」類事故中各細項型態（穿越道路中、同向通行中、對向通行中等）的比例分布，揭示行人在哪些行為情境下最容易發生事故。',
+    '2026年1-4月臺北市人與車事故類型細項比例。',
+    '以圓餅圖呈現 2026 年 1–4 月臺北市「人與車」類事故中各細項型態的比例分布。',
     '識別最危險的行人行為情境，作為行人安全教育宣導與設施改善的依據。',
     ARRAY['https://data.gov.tw/dataset/13139'],
     ARRAY['b12705030'],
     NOW(), NOW(),
     'two_d',
-    E'SELECT subtype AS x_axis, count::INT AS data\nFROM public.ped_accident_subtype_stats\nORDER BY count DESC',
+    E'SELECT subtype AS x_axis, count::INT AS data\nFROM public.ped_accident_subtype_stats\nWHERE city = ''taipei''\nORDER BY count DESC',
     NULL,
-    'metrotaipei'
+    'taipei'
 );
 
 -- ============================================================
