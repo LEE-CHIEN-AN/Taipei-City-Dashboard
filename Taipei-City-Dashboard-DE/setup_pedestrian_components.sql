@@ -99,8 +99,18 @@ ON CONFLICT (index) DO UPDATE
         paint    = EXCLUDED.paint,
         property = EXCLUDED.property;
 
--- 取得剛剛插入的 component_maps id 備用
--- (假設為自動序列，查詢: SELECT id FROM component_maps WHERE index='traffic_pedestrian_heatmap')
+-- 台北市專用 map config（下拉選單切換用）
+INSERT INTO public.component_maps (index, title, type, source, size, icon, paint, property)
+SELECT 'traffic_pedestrian_heatmap_taipei', '行人事故熱點(臺北)', type, source, size, icon, paint, property
+FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap'
+ON CONFLICT (index) DO UPDATE
+    SET title    = EXCLUDED.title,
+        type     = EXCLUDED.type,
+        source   = EXCLUDED.source,
+        size     = EXCLUDED.size,
+        icon     = EXCLUDED.icon,
+        paint    = EXCLUDED.paint,
+        property = EXCLUDED.property;
 
 
 -- ============================================================
@@ -154,7 +164,9 @@ INSERT INTO public.query_charts (
     query_type, query_chart, query_history, city
 )
 SELECT
-    index, history_config, map_config_ids, map_filter,
+    index, history_config,
+    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap_taipei' LIMIT 1),
+    map_filter,
     time_from, time_to, update_freq, update_freq_unit,
     source, short_desc, long_desc, use_case,
     links, contributors, NOW(), NOW(),

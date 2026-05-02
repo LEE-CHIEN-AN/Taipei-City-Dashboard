@@ -136,6 +136,17 @@ function popularBasicLayerGA(map_config) {
 		});
 	}
 }
+
+function getAvailableCities(componentIndex) {
+	const allCities = contentStore.currentDashboard?.city
+		? contentStore.cityManager.getSelectList(contentStore.currentDashboard?.city)
+		: contentStore.cityManager.getCities(contentStore.cityManager.activeCities);
+	return allCities.filter((c) =>
+		contentStore.cityDashboard.components?.some(
+			(d) => d.index === componentIndex && d.city === c.value,
+		),
+	);
+}
 </script>
 
 <template>
@@ -263,23 +274,8 @@ function popularBasicLayerGA(map_config) {
           :info-btn="true"
           :active-city="item.city"
           :select-btn="true"
-          :select-btn-disabled="
-            contentStore.cityManager.getSelectList(
-              contentStore.currentDashboard?.city,
-            ).length === 1 ||
-              contentStore.currentDashboardExcluded.components.filter(
-                (data) => data.index === item.index,
-              ).length === 0
-          "
-          :select-btn-list="
-            contentStore.currentDashboard?.city
-              ? contentStore.cityManager.getSelectList(
-                contentStore.currentDashboard?.city,
-              )
-              : contentStore.cityManager.getCities(
-                contentStore.cityManager.activeCities,
-              )
-          "
+          :select-btn-disabled="getAvailableCities(item.index).length <= 1"
+          :select-btn-list="getAvailableCities(item.index)"
           :city-tag="
             contentStore.currentDashboard?.city
               ? contentStore.cityManager.getTagList(
@@ -477,23 +473,8 @@ function popularBasicLayerGA(map_config) {
           :info-btn="true"
           :active-city="item.city"
           :select-btn="true"
-          :select-btn-disabled="
-            contentStore.cityManager.getSelectList(
-              contentStore.currentDashboard?.city,
-            ).length === 1 ||
-              contentStore.currentDashboardExcluded.components.filter(
-                (data) => data.index === item.index,
-              ).length === 0
-          "
-          :select-btn-list="
-            contentStore.currentDashboard?.city
-              ? contentStore.cityManager.getSelectList(
-                contentStore.currentDashboard?.city,
-              )
-              : contentStore.cityManager.getCities(
-                contentStore.cityManager.activeCities,
-              )
-          "
+          :select-btn-disabled="getAvailableCities(item.index).length <= 1"
+          :select-btn-list="getAvailableCities(item.index)"
           :city-tag="
             contentStore.currentDashboard?.city
               ? contentStore.cityManager.getTagList(
