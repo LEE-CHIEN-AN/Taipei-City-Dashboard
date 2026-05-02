@@ -78,6 +78,7 @@ const props = defineProps({
 	toggleOn: { type: Boolean, default: false },
 	filterButtons: { type: Array, default: () => [] },
 	filterValue: { type: [Number, String, null], default: null },
+	chartDataOverride: { type: Array, default: null },
 });
 
 const emits = defineEmits([
@@ -447,7 +448,7 @@ function returnChartComponent(name, svg) {
         :active-chart="activeChart"
         :active-city="activeCity"
         :chart_config="config.chart_config"
-        :series="config.chart_data"
+        :series="chartDataOverride !== null ? chartDataOverride : config.chart_data"
         :map_config="config.map_config"
         :map_filter="config.map_filter"
         :map_filter_on="mode.includes('map')"

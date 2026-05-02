@@ -38,6 +38,28 @@ function isIsochroneComponent(item) {
   return item.index?.startsWith("transit_isochrone");
 }
 
+function getIsochroneChartData(item) {
+  const minutes = mapStore.isochroneMinutes;
+  const data = item.chart_data;
+  const categories = item.chart_config?.categories;
+  if (!data || !categories || !Array.isArray(data) || data.length === 0) return null;
+
+  const s5  = data.find(s => s.name === '5分鐘')?.data  || [];
+  const s10 = data.find(s => s.name === '10分鐘')?.data || [];
+  const s15 = data.find(s => s.name === '15分鐘')?.data || [];
+
+  let values;
+  if (minutes === 5) {
+    values = s5;
+  } else if (minutes === 10) {
+    values = s5.map((v, i) => (v || 0) + (s10[i] || 0));
+  } else {
+    values = s5.map((v, i) => (v || 0) + (s10[i] || 0) + (s15[i] || 0));
+  }
+
+  return [{ data: categories.map((cat, i) => ({ x: cat, y: Math.round(values[i] || 0) })) }];
+}
+
 const toggleOn = ref({
 	hasMap: [],
 	noMap: [],
@@ -187,6 +209,7 @@ function popularBasicLayerGA(map_config) {
           :toggle-on="toggleOn.mapLayer[arrayIdx]"
           :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
           :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
+          :chart-data-override="isIsochroneComponent(item) ? getIsochroneChartData(item) : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);
@@ -309,6 +332,7 @@ function popularBasicLayerGA(map_config) {
           :toggle-on="toggleOn.hasMap[arrayIdx]"
           :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
           :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
+          :chart-data-override="isIsochroneComponent(item) ? getIsochroneChartData(item) : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);

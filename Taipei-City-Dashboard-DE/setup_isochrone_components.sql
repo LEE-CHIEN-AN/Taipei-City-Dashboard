@@ -14,21 +14,21 @@ ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 
 
 -- ============================================================
--- 2. component_charts（圖例用 map_legend）
+-- 2. component_charts（ColumnChart 長條圖 + DistrictChart 行政區覆蓋圖）
 -- ============================================================
 
 INSERT INTO public.component_charts (index, color, types, unit) VALUES
     ('transit_isochrone_bus',
         ARRAY['#FFF176', '#FF9800', '#E53935'],
-        ARRAY['MapLegend'],
+        ARRAY['ColumnChart','DistrictChart'],
         '分鐘'),
     ('transit_isochrone_mrt',
         ARRAY['#80DEEA', '#0097A7', '#004D40'],
-        ARRAY['MapLegend'],
+        ARRAY['ColumnChart','DistrictChart'],
         '分鐘'),
     ('transit_isochrone_tra',
         ARRAY['#CE93D8', '#7B1FA2', '#311B92'],
-        ARRAY['MapLegend'],
+        ARRAY['ColumnChart','DistrictChart'],
         '分鐘')
 ON CONFLICT (index) DO UPDATE
     SET color = EXCLUDED.color,
