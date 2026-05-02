@@ -76,6 +76,8 @@ const props = defineProps({
 	footer: { type: Boolean, default: true },
 	activeCity: { type: String, default: '' },
 	toggleOn: { type: Boolean, default: false },
+	filterButtons: { type: Array, default: () => [] },
+	filterValue: { type: [Number, String, null], default: null },
 });
 
 const emits = defineEmits([
@@ -89,7 +91,8 @@ const emits = defineEmits([
 	"clearByParamFilter",
 	"clearByLayerFilter",
 	"fly",
-	"changeCity"
+	"changeCity",
+	"filterChange",
 ]);
 
 const activeChart = ref(props.config.chart_config.types[0]);
@@ -376,6 +379,22 @@ function returnChartComponent(name, svg) {
           @click="changeActiveChart(item)"
         >
           {{ chartTypes[item] }}
+        </button>
+      </div>
+      <div
+        v-if="filterButtons.length > 0"
+        class="dashboardcomponent-control-filter"
+      >
+        <button
+          v-for="opt in filterButtons"
+          :key="String(opt.value)"
+          :class="{
+            'dashboardcomponent-control-group-button': true,
+            'dashboardcomponent-control-group-active': filterValue === opt.value,
+          }"
+          @click="$emit('filterChange', opt.value)"
+        >
+          {{ opt.label }}
         </button>
       </div>
     </div>
@@ -694,6 +713,7 @@ button:hover {
 	&-control {
 		width: 100%;
 		display: flex;
+		flex-wrap: wrap;
 		// justify-content: center;
 		align-items: center;
 		// position: absolute;
@@ -701,6 +721,15 @@ button:hover {
 		left: 0;
 		z-index: 8;
 		padding: 8px 0;
+		row-gap: 6px;
+
+		&-filter {
+			width: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 4px;
+		}
 
 		&-group {
 			display: flex;

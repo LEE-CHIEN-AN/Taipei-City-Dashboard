@@ -17,19 +17,24 @@ git pull origin feature/transit-isochrone
 
 ## 二、Import 行人安全儀表板資料
 
-### 2-1. 建立資料表結構
+### 2-1. Import 事故資料（dump 檔，約 12MB）
 
-```powershell
-docker exec -i postgres-data psql -U postgres -d dashboard < Taipei-City-Dashboard-DE/setup_pedestrian_tables.sql
-```
-
-### 2-2. Import 事故資料（dump 檔，約 15MB）
+> dump 本身會自動建表，不需要先跑 setup_pedestrian_tables.sql
 
 ```powershell
 docker exec -i postgres-data psql -U postgres -d dashboard < Taipei-City-Dashboard-DE/pedestrian_all.sql
 ```
 
-### 2-3. 設定儀表板組件
+看到下面這樣就成功了（有些 `already exists` 警告可以忽略）：
+```
+SET
+SET
+...
+COPY 29
+COPY 12
+```
+
+### 2-2. 設定儀表板組件
 
 ```powershell
 docker exec -i postgres-manager psql -U postgres -d dashboardmanager < Taipei-City-Dashboard-DE/setup_pedestrian_components.sql
@@ -85,8 +90,19 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
 
 ## 常見問題
 
+**Q：跑 pedestrian_all.sql 出現 `already exists` 錯誤？**
+- 正常！dump 會建表，若表已存在就跳過，資料仍會正確匯入
+- 確認最後有出現 `COPY xxx` 訊息代表資料有進去
+
+**Q：行政區圖（DistrictChart）是空的？**
+- 確認 `metro_district_boundaries` 有資料：
+  ```powershell
+  docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.metro_district_boundaries;"
+  ```
+  應該要是 41（台北 12 + 新北 29）。若是 0，重新跑 step 2-1
+
 **Q：組件顯示 400 錯誤？**
-- 確認 step 2-3 / 3-1 的組件設定 SQL 有跑過
+- 確認 step 2-2 / 3-1 的組件設定 SQL 有跑過
 - 確認資料表有資料：
   ```powershell
   docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.traffic_pedestrian_accident_taipei;"
@@ -94,7 +110,7 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
   ```
 
 **Q：熱點圖有但其他圖表沒有？**
-- step 2-3 的 `setup_pedestrian_components.sql` 可能沒跑，補跑一次
+- step 2-2 的 `setup_pedestrian_components.sql` 可能沒跑，補跑一次
 
 **Q：`compute_isochrone_coverage.py` 連不上 DB？**
 - 確認 Docker 有在跑：`docker ps`

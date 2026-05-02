@@ -34,9 +34,9 @@ const isochroneOptions = [
   { label: "15 分鐘", value: 15 },
 ];
 
-const hasActiveIsochrone = computed(() =>
-  mapStore.currentVisibleLayers.some((id) => id.startsWith("isochrone_"))
-);
+function isIsochroneComponent(item) {
+  return item.index?.startsWith("transit_isochrone");
+}
 
 const toggleOn = ref({
 	hasMap: [],
@@ -185,6 +185,8 @@ function popularBasicLayerGA(map_config) {
           "
           :toggle-disable="shouldDisable(item.map_config)"
           :toggle-on="toggleOn.mapLayer[arrayIdx]"
+          :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
+          :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);
@@ -220,6 +222,11 @@ function popularBasicLayerGA(map_config) {
           @clear-by-layer-filter="
             (map_config) => {
               mapStore.clearByLayerFilter(map_config);
+            }
+          "
+          @filter-change="
+            (v) => {
+              if (isIsochroneComponent(item)) mapStore.setIsochroneFilter(v);
             }
           "
           @change-city="
@@ -258,21 +265,6 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
-        <!-- 步行時間篩選器 -->
-        <div
-          v-if="hasActiveIsochrone"
-          class="isochrone-walk-filter"
-        >
-          <p class="isochrone-walk-filter-label">步行時間篩選</p>
-          <div class="isochrone-walk-filter-buttons">
-            <button
-              v-for="opt in isochroneOptions"
-              :key="opt.value"
-              :class="['isochrone-walk-filter-btn', { active: mapStore.isochroneMinutes === opt.value }]"
-              @click="mapStore.setIsochroneFilter(opt.value)"
-            >{{ opt.label }}</button>
-          </div>
-        </div>
       </div>
       <!-- 2. Dashboards that have components -->
       <div
@@ -315,6 +307,8 @@ function popularBasicLayerGA(map_config) {
           "
           :toggle-disable="shouldDisable(item.map_config)"
           :toggle-on="toggleOn.hasMap[arrayIdx]"
+          :filter-buttons="isIsochroneComponent(item) ? isochroneOptions : []"
+          :filter-value="isIsochroneComponent(item) ? mapStore.isochroneMinutes : null"
           @info="
             (item) => {
               dialogStore.showMoreInfo(item);
@@ -357,6 +351,11 @@ function popularBasicLayerGA(map_config) {
               mapStore.flyToLocation(location);
             }
           "
+          @filter-change="
+            (v) => {
+              if (isIsochroneComponent(item)) mapStore.setIsochroneFilter(v);
+            }
+          "
           @change-city="
             (city) => {
               const selectedData =
@@ -393,21 +392,6 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
-        <!-- 步行時間篩選器 -->
-        <div
-          v-if="hasActiveIsochrone"
-          class="isochrone-walk-filter"
-        >
-          <p class="isochrone-walk-filter-label">步行時間篩選</p>
-          <div class="isochrone-walk-filter-buttons">
-            <button
-              v-for="opt in isochroneOptions"
-              :key="opt.value"
-              :class="['isochrone-walk-filter-btn', { active: mapStore.isochroneMinutes === opt.value }]"
-              @click="mapStore.setIsochroneFilter(opt.value)"
-            >{{ opt.label }}</button>
-          </div>
-        </div>
         <h2 v-if="contentStore.mapLayers.length > 0">
           基本圖層
         </h2>
@@ -688,45 +672,6 @@ function popularBasicLayerGA(map_config) {
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
-	}
-}
-
-.isochrone-walk-filter {
-	background: var(--color-component-background);
-	border-radius: 5px;
-	padding: var(--font-m);
-
-	&-label {
-		font-size: 0.75rem;
-		color: var(--color-complement-text);
-		margin-bottom: 0.5rem;
-	}
-
-	&-buttons {
-		display: flex;
-		gap: 0.4rem;
-		flex-wrap: wrap;
-	}
-
-	&-btn {
-		font-size: 0.75rem;
-		padding: 0.25rem 0.65rem;
-		border-radius: 1rem;
-		border: 1px solid var(--color-border);
-		background: transparent;
-		color: var(--color-complement-text);
-		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
-
-		&:hover {
-			background: var(--color-border);
-		}
-
-		&.active {
-			background: var(--color-highlight);
-			color: white;
-			border-color: var(--color-highlight);
-		}
 	}
 }
 </style>
