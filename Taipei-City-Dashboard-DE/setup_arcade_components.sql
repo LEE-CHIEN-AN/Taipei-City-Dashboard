@@ -4,6 +4,17 @@
 --   DistrictChart + BarChart + DonutChart + MapLegend
 
 -- ============================================================
+-- 0-pre. contributors 表（組件資訊面板需要 user_id 存在才能渲染）
+-- ============================================================
+
+INSERT INTO public.contributors (user_id, user_name, image, link, include, created_at, updated_at)
+SELECT 'b12705030', 'b12705030',
+       'https://avatars.githubusercontent.com/b12705030',
+       'https://github.com/b12705030',
+       true, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM public.contributors WHERE user_id = 'b12705030');
+
+-- ============================================================
 -- 0. 清除舊有已不使用的組件
 -- ============================================================
 
