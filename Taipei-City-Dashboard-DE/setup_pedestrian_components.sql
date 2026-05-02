@@ -266,7 +266,7 @@ INSERT INTO public.query_charts (
     NOW(),
     NOW(),
     'time',
-    E'SELECT\n    make_date(year::int, 1, 1) AS x_axis,\n    city AS y_axis,\n    accident_count AS data\nFROM traffic_pedestrian_yearly_trend\nWHERE year > 0\nORDER BY year, city',
+    E'SELECT\n    make_date(year::int, 1, 1) AS x_axis,\n    city AS y_axis,\n    MAX(accident_count)::int AS data\nFROM traffic_pedestrian_yearly_trend\nWHERE year > 0\nGROUP BY year, city\nORDER BY year, city',
     NULL,
     'metrotaipei'
 );

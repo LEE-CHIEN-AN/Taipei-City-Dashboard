@@ -465,11 +465,15 @@ function popularBasicLayerGA(map_config) {
         <h2 v-if="parseMapLayers.noMap?.length > 0">
           無空間資料組件
         </h2>
+        <div
+          v-if="parseMapLayers.noMap?.length > 0"
+          class="map-charts-nomap-grid"
+        >
         <DashboardComponent
           v-for="(item, arrayIdx) in parseMapLayers.noMap"
           :key="`map-layer-${item.index}-${item.city}`"
           :config="item"
-          mode="map"
+          mode="half"
           :info-btn="true"
           :active-city="item.city"
           :select-btn="true"
@@ -537,6 +541,7 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
+        </div>
       </div>
       <!-- 3. If dashboard is still loading -->
       <div
@@ -586,7 +591,7 @@ function popularBasicLayerGA(map_config) {
 	margin: var(--font-m) var(--font-m);
 
 	&-charts {
-		width: 360px;
+		width: 460px;
 		max-height: 100%;
 		height: fit-content;
 		display: grid;
@@ -596,11 +601,17 @@ function popularBasicLayerGA(map_config) {
 		overflow-y: scroll;
 
 		@media (min-width: 1000px) {
-			width: 370px;
+			width: 500px;
 		}
 
 		@media (min-width: 2000px) {
-			width: 400px;
+			width: 540px;
+		}
+
+		&-nomap-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: var(--font-s);
 		}
 
 		&-nodashboard {
