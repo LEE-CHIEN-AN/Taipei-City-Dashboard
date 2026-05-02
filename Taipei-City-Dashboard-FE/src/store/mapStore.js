@@ -95,6 +95,8 @@ export const useMapStore = defineStore("map", {
 		layerUpdateTime: {
 			// [layerId]: Date
 		},
+		// 待套用的 choropleth 資料 { [layerId]: { geoKey, categories, values } }
+		pendingChoropleth: {},
 	}),
 	actions: {
 		/* Initialize Mapbox */
@@ -345,8 +347,8 @@ export const useMapStore = defineStore("map", {
 				});
 			};
 
-			// 等待所有 3D 模型載入完成
-			await Promise.all(models.map(loadModel));
+			// 等待所有 3D 模型載入完成（allSettled 確保即使單一模型失敗仍解除 preloading）
+			await Promise.allSettled(models.map(loadModel));
 
 			// 全部載入完畢才變 false
 			this.isPreloading = false;
@@ -420,6 +422,63 @@ export const useMapStore = defineStore("map", {
 			}
 		},
 
+		/* Choropleth (District Fill Coloring) */
+		// Schedule a data-driven choropleth for a district fill layer.
+		// options.mode = 'regular' (single color, opacity by magnitude)
+		//               'diff'    (yellow when positive, blue when negative)
+		scheduleChoropleth(layerId, geoKey, categories, values, options) {
+			const config = { geoKey, categories, values, ...(options || {}) };
+			this.pendingChoropleth[layerId] = config;
+			if (this.map && this.map.getLayer(layerId)) {
+				this._applyChoropleth(layerId, config);
+				delete this.pendingChoropleth[layerId];
+			}
+		},
+		// Internal: apply choropleth paint to an existing layer.
+		_applyChoropleth(layerId, config) {
+			if (!this.map || !this.map.getLayer(layerId)) return;
+			const { geoKey, categories, values } = config;
+			const mode = config.mode || "regular";
+
+			if (mode === "diff") {
+				const dayColor = config.dayColor || "#F5A623";
+				const nightColor = config.nightColor || "#24B0DD";
+				const absVals = values.filter((v) => v != null).map(Math.abs);
+				const maxAbs = Math.max(...absVals) || 1;
+				const colorExpr = ["match", ["get", geoKey]];
+				const opacityExpr = ["match", ["get", geoKey]];
+				categories.forEach((cat, i) => {
+					if (values[i] == null) return;
+					colorExpr.push(cat, values[i] >= 0 ? dayColor : nightColor);
+					opacityExpr.push(cat, parseFloat((0.1 + (Math.abs(values[i]) / maxAbs) * 0.65).toFixed(3)));
+				});
+				colorExpr.push("#888888");
+				opacityExpr.push(0.05);
+				this.map.setPaintProperty(layerId, "fill-color", colorExpr);
+				this.map.setPaintProperty(layerId, "fill-opacity", opacityExpr);
+			} else {
+				const fillColor = config.fillColor || "#3B82F6";
+				const nums = values.filter((v) => v != null && !isNaN(v));
+				if (!nums.length) return;
+				const maxVal = Math.max(...nums);
+				const minVal = Math.min(...nums);
+				const range = maxVal - minVal || 1;
+				const opacityExpr = ["match", ["get", geoKey]];
+				categories.forEach((cat, i) => {
+					if (values[i] != null) {
+						opacityExpr.push(cat, parseFloat((0.05 + ((values[i] - minVal) / range) * 0.70).toFixed(3)));
+					}
+				});
+				opacityExpr.push(0.05);
+				this.map.setPaintProperty(layerId, "fill-color", fillColor);
+				this.map.setPaintProperty(layerId, "fill-opacity", opacityExpr);
+			}
+		},
+		// Public alias kept for backward compatibility.
+		setDistrictChoropleth(layerId, geoKey, categories, values) {
+			this._applyChoropleth(layerId, { geoKey, categories, values });
+		},
+
 		/* Adding Map Layers */
 		// 1. Passes in the map_config (an Array of Objects) of a component and adds all layers to the map layer list
 		addToMapLayerList(map_config) {
@@ -453,8 +512,10 @@ export const useMapStore = defineStore("map", {
 		},
 		// 2. Call an API to get the layer data
 		fetchLocalGeoJson(map_config) {
+			// Strip _day / _night / _diff suffix so suffixed indices reuse the same GeoJSON file
+			const geoJsonName = map_config.index.replace(/_(day|night|diff)$/, "");
 			axios
-				.get(`/mapData/${map_config.index}.geojson`)
+				.get(`/mapData/${geoJsonName}.geojson`)
 				.then((rs) => {
 					this.addGeojsonSource(map_config, rs.data);
 				})
@@ -686,6 +747,11 @@ export const useMapStore = defineStore("map", {
 			this.loadingLayers = this.loadingLayers.filter(
 				(el) => el !== map_config.layerId,
 			);
+			// Apply queued choropleth if one was scheduled before the layer loaded
+			if (this.pendingChoropleth[map_config.layerId]) {
+				this._applyChoropleth(map_config.layerId, this.pendingChoropleth[map_config.layerId]);
+				delete this.pendingChoropleth[map_config.layerId];
+			}
 		},
 		animateFilter(mapLayerId) {
 			this.stopAnimation();

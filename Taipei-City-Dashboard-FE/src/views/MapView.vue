@@ -77,7 +77,7 @@ function handleOpenSettings() {
 }
 
 // Open and closes the component as well as communicates to the mapStore to turn on and off map layers
-function handleToggle(value, map_config) {
+function handleToggle(value, map_config, component) {
 	if (!map_config[0]) {
 		if (value) {
 			dialogStore.showNotification(
@@ -89,11 +89,50 @@ function handleToggle(value, map_config) {
 	}
 	if (value) {
 		mapStore.addToMapLayerList(map_config);
+		scheduleChoroplethForComponent(component);
 	} else {
 		mapStore.clearByParamFilter(map_config);
 		mapStore.turnOffMapLayerVisibility(map_config);
 	}
 }
+
+// Schedule choropleth for all eligible fill layers in a component.
+// A fill layer is eligible when it has TNAME in its property and the component has district-level categories.
+function scheduleChoroplethForComponent(component) {
+	if (!component?.chart_data?.[0]?.data || !component?.chart_config?.categories?.length) return;
+	const categories = component.chart_config.categories;
+	const values = component.chart_data[0].data;
+	const isDiff = !!component.index?.includes("diff");
+	component.map_config?.forEach((el) => {
+		if (el.type !== "fill") return;
+		const prop = Array.isArray(el.property) ? el.property : [];
+		if (!prop.some((p) => p.key === "TNAME")) return;
+		const layerId = `${el.index}-${el.type}-${el.city}`;
+		if (isDiff) {
+			mapStore.scheduleChoropleth(layerId, "TNAME", categories, values, {
+				mode: "diff",
+				dayColor: "#F5A623",
+				nightColor: "#24B0DD",
+			});
+		} else {
+			const fillColor = (el.paint && el.paint["fill-color"]) || "#3B82F6";
+			mapStore.scheduleChoropleth(layerId, "TNAME", categories, values, {
+				mode: "regular",
+				fillColor,
+			});
+		}
+	});
+}
+
+// Re-apply choropleth when chart_data is refreshed (e.g. after city switch).
+// Watch the entire components array with deep:true so nested chart_data changes are detected.
+watch(
+	() => contentStore.currentDashboard.components,
+	(components) => {
+		components?.forEach((component) => scheduleChoroplethForComponent(component));
+	},
+	{ deep: true },
+);
 
 function toggleSwitchBtn(value, Btn, BtnIndex) {
 	toggleOn.value[Btn][BtnIndex] = value;
@@ -181,7 +220,7 @@ function popularBasicLayerGA(map_config) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'mapLayer', arrayIdx);
               popularThematicLayerGA(map_config);
             }
@@ -225,12 +264,12 @@ function popularBasicLayerGA(map_config) {
                   },
                 );
 
-              const componentIndex =
-                contentStore.currentDashboard.components.findIndex(
-                  (item) => item.id === selectedData.id,
-                );
-
               if (selectedData) {
+                const componentIndex =
+                  contentStore.currentDashboard.components.findIndex(
+                    (comp) => comp.id === item.id,
+                  );
+
                 mapStore.clearByParamFilter(item.map_config);
                 mapStore.turnOffMapLayerVisibility(
                   item.map_config,
@@ -296,7 +335,7 @@ function popularBasicLayerGA(map_config) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'hasMap', arrayIdx);
               popularThematicLayerGA(map_config);
             }
@@ -345,12 +384,12 @@ function popularBasicLayerGA(map_config) {
                   },
                 );
 
-              const componentIndex =
-                contentStore.currentDashboard.components.findIndex(
-                  (item) => item.id === selectedData.id,
-                );
-
               if (selectedData) {
+                const componentIndex =
+                  contentStore.currentDashboard.components.findIndex(
+                    (comp) => comp.id === item.id,
+                  );
+
                 mapStore.clearByParamFilter(item.map_config);
                 mapStore.turnOffMapLayerVisibility(
                   item.map_config,
@@ -402,7 +441,7 @@ function popularBasicLayerGA(map_config) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'basicLayer', arrayIdx);
               popularBasicLayerGA(map_config);
             }
@@ -505,7 +544,7 @@ function popularBasicLayerGA(map_config) {
           "
           @toggle="
             (value, map_config) => {
-              handleToggle(value, map_config);
+              handleToggle(value, map_config, item);
               toggleSwitchBtn(value, 'noMap', arrayIdx);
             }
           "
