@@ -1,0 +1,337 @@
+-- 雙北騎樓整平儀表板 — dashboardmanager DB 組件設定腳本
+-- 連線：localhost:5432 / dashboardmanager DB（postgres-manager）
+-- 執行前請確認：
+--   1. setup_arcade_tables.sql 已在 postgres-data 執行
+--   2. import_arcade_csv.py 已執行完畢（資料已匯入）
+
+-- ============================================================
+-- 1. components 表（組件基本資訊）
+-- ============================================================
+
+INSERT INTO public.components (index, name) VALUES
+    ('arcade_total_district',        '雙北騎樓整平累積量'),
+    ('arcade_yearly_city_trend',     '雙北騎樓整平逐年趨勢'),
+    ('arcade_yearly_district_trend', '各行政區騎樓整平逐年趨勢')
+ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
+
+
+-- ============================================================
+-- 2. component_charts 表（圖表設定）
+-- ============================================================
+
+INSERT INTO public.component_charts (index, color, types, unit) VALUES
+    -- C1：行政區圖（漸層熱區）+ 橫向長條圖
+    ('arcade_total_district',
+        ARRAY['#FFF9C4', '#FFB300', '#E65100', '#B71C1C'],
+        ARRAY['DistrictChart', 'BarChart'],
+        '公尺'),
+    -- C2：雙軸折線圖（台北 vs 新北）
+    ('arcade_yearly_city_trend',
+        ARRAY['#E53935', '#1E88E5'],
+        ARRAY['TimelineSeparateChart'],
+        '公尺'),
+    -- C3：多線折線圖（各行政區）
+    ('arcade_yearly_district_trend',
+        ARRAY['#E53935', '#F4511E', '#FB8C00', '#FDD835',
+              '#43A047', '#00ACC1', '#1E88E5', '#5E35B1',
+              '#D81B60', '#8D6E63', '#546E7A', '#FF7043'],
+        ARRAY['TimelineSeparateChart'],
+        '公尺')
+ON CONFLICT (index) DO UPDATE
+    SET color = EXCLUDED.color,
+        types = EXCLUDED.types,
+        unit  = EXCLUDED.unit;
+
+
+-- ============================================================
+-- 3. query_charts 表
+-- ============================================================
+
+-- 清除既有的 arcade query_charts 避免重複
+DELETE FROM public.query_charts WHERE index LIKE 'arcade_%';
+
+-- ── C1：雙北騎樓整平累積量 ────────────────────────────────────
+
+-- C1-taipei：台北市各行政區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_total_district',
+    NULL, '{}', '{}',
+    'static', NULL, NULL, NULL,
+    '臺北市政府工務局',
+    '台北市各行政區騎樓整平累積長度。',
+    '以行政區圖與長條圖呈現台北市各行政區騎樓整平的累積公尺數，反映不同地區步行環境改善的投入程度。',
+    '識別騎樓整平優先區域，協助政府評估步行空間品質並規劃後續改善計畫。',
+    ARRAY['https://data.taipei/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT district AS x_axis, ROUND(total_length_m)::INT AS data\nFROM public.arcade_total_by_district\nWHERE city = ''台北市''\nORDER BY data DESC',
+    NULL,
+    'taipei'
+);
+
+-- C1-newtaipei：新北市各行政區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_total_district',
+    NULL, '{}', '{}',
+    'static', NULL, NULL, NULL,
+    '新北市政府工務局',
+    '新北市各行政區騎樓整平累積長度。',
+    '以行政區圖與長條圖呈現新北市各行政區騎樓整平的累積公尺數，反映不同地區步行環境改善的投入程度。',
+    '識別騎樓整平優先區域，協助政府評估步行空間品質並規劃後續改善計畫。',
+    ARRAY['https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT district AS x_axis, ROUND(total_length_m)::INT AS data\nFROM public.arcade_total_by_district\nWHERE city = ''新北市''\nORDER BY data DESC',
+    NULL,
+    'newtaipei'
+);
+
+-- C1-metrotaipei：雙北合計（排序前 20）
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_total_district',
+    NULL, '{}', '{}',
+    'static', NULL, NULL, NULL,
+    '臺北市政府工務局、新北市政府工務局',
+    '雙北各行政區騎樓整平累積長度（排序 Top 20）。',
+    '以行政區圖與長條圖呈現雙北各行政區騎樓整平的累積公尺數，反映整體大台北地區步行環境的空間分佈。',
+    '比較雙北各行政區整平進度，找出整平量最高與最低的行政區。',
+    ARRAY['https://data.taipei/', 'https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'two_d',
+    E'SELECT district AS x_axis, ROUND(total_length_m)::INT AS data\nFROM public.arcade_total_by_district\nORDER BY data DESC\nLIMIT 20',
+    NULL,
+    'metrotaipei'
+);
+
+-- ── C2：雙北騎樓整平逐年趨勢 ─────────────────────────────────
+
+-- C2-taipei
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_city_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '臺北市政府工務局',
+    '台北市騎樓整平逐年公尺數（1991–1999）。',
+    '以折線圖呈現台北市騎樓整平的年度整平長度，觀察1990年代大規模整平政策的推動波動。',
+    '評估台北市騎樓整平政策推動時程，了解整平力道的年度分佈。',
+    ARRAY['https://data.taipei/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'SELECT make_date(year::int, 1, 1) AS x_axis,\n       city AS y_axis,\n       ROUND(city_total_m)::INT AS data\nFROM public.arcade_yearly_by_city\nWHERE city = ''台北市''\nORDER BY year',
+    NULL,
+    'taipei'
+);
+
+-- C2-newtaipei
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_city_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '新北市政府工務局',
+    '新北市騎樓整平逐年公尺數（2010–2024）。',
+    '以折線圖呈現新北市騎樓整平的年度整平長度，觀察近年整平政策推動的持續性與趨勢。',
+    '評估新北市騎樓整平政策效果，了解哪些年度整平量較大，協助研擬後續改善重點。',
+    ARRAY['https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'SELECT make_date(year::int, 1, 1) AS x_axis,\n       city AS y_axis,\n       ROUND(city_total_m)::INT AS data\nFROM public.arcade_yearly_by_city\nWHERE city = ''新北市''\nORDER BY year',
+    NULL,
+    'newtaipei'
+);
+
+-- C2-metrotaipei：雙北對比折線圖
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_city_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '臺北市政府工務局、新北市政府工務局',
+    '雙北騎樓整平逐年趨勢對比（台北1991–1999、新北2010–2024）。',
+    '以雙軸折線圖呈現台北市與新北市的年度騎樓整平長度，比較兩市整平政策的推動節奏。台北市集中在1990年代大規模整平，新北市則在2010年代後持續穩定推進。',
+    '比較雙北騎樓整平政策的執行節奏，了解各市整平高峰期，評估現階段整平資源是否充足。',
+    ARRAY['https://data.taipei/', 'https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'SELECT make_date(year::int, 1, 1) AS x_axis,\n       city AS y_axis,\n       ROUND(city_total_m)::INT AS data\nFROM public.arcade_yearly_by_city\nORDER BY year, city',
+    NULL,
+    'metrotaipei'
+);
+
+-- ── C3：各行政區騎樓整平逐年趨勢 ─────────────────────────────
+
+-- C3-taipei：台北市各行政區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_district_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '臺北市政府工務局',
+    '台北市各行政區騎樓整平逐年長度。',
+    '以多線折線圖呈現台北市12個行政區的騎樓整平年度進度，可觀察各區整平時序的差異，識別整平較慢的行政區。',
+    '比較台北市各行政區整平推動速度，找出哪些行政區整平量集中在特定年份，協助評估政策落實均衡度。',
+    ARRAY['https://data.taipei/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'SELECT make_date(year::int, 1, 1) AS x_axis,\n       district AS y_axis,\n       ROUND(length_m)::INT AS data\nFROM public.arcade_yearly_by_district\nWHERE city = ''台北市'' AND length_m > 0\nORDER BY year, district',
+    NULL,
+    'taipei'
+);
+
+-- C3-newtaipei：新北市各行政區
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_district_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '新北市政府工務局',
+    '新北市各行政區騎樓整平逐年長度（2010–2024）。',
+    '以多線折線圖呈現新北市各行政區的騎樓整平年度進度，可觀察板橋、中和、永和等人口密集區整平推動情況。',
+    '比較新北市各行政區整平推動速度，找出整平量下滑的行政區，建議政府加強改善。',
+    ARRAY['https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'SELECT make_date(year::int, 1, 1) AS x_axis,\n       district AS y_axis,\n       ROUND(length_m)::INT AS data\nFROM public.arcade_yearly_by_district\nWHERE city = ''新北市'' AND length_m > 0\nORDER BY year, district',
+    NULL,
+    'newtaipei'
+);
+
+-- C3-metrotaipei：雙北整平量前 8 行政區（避免折線過多）
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+) VALUES (
+    'arcade_yearly_district_trend',
+    NULL, '{}', '{}',
+    'static', NULL, 1, 'year',
+    '臺北市政府工務局、新北市政府工務局',
+    '雙北整平量前8行政區逐年趨勢。',
+    '以多線折線圖呈現雙北累積整平量最高的8個行政區（台北萬華、中山、大同、大安；新北板橋、中和、新莊、永和）的逐年整平進度，呈現各重點行政區整平政策推動的時序差異。',
+    '識別雙北整平推動最積極的行政區，作為步行環境改善政策的參考依據。',
+    ARRAY['https://data.taipei/', 'https://data.ntpc.gov.tw/'],
+    ARRAY['b12705030'],
+    NOW(), NOW(),
+    'time',
+    E'WITH top_districts AS (\n    SELECT district\n    FROM public.arcade_total_by_district\n    ORDER BY total_length_m DESC\n    LIMIT 8\n)\nSELECT make_date(d.year::int, 1, 1) AS x_axis,\n       d.district AS y_axis,\n       ROUND(d.length_m)::INT AS data\nFROM public.arcade_yearly_by_district d\nJOIN top_districts t ON d.district = t.district\nWHERE d.length_m > 0\nORDER BY d.year, d.district',
+    NULL,
+    'metrotaipei'
+);
+
+
+-- ============================================================
+-- 4. dashboards 表（建立騎樓整平儀表板）
+-- ============================================================
+
+INSERT INTO public.dashboards (index, name, components, icon, created_at, updated_at)
+SELECT
+    'arcade-leveling',
+    '騎樓整平指標',
+    ARRAY(
+        SELECT id FROM public.components
+        WHERE index IN (
+            'arcade_total_district',
+            'arcade_yearly_city_trend',
+            'arcade_yearly_district_trend'
+        )
+        ORDER BY ARRAY_POSITION(
+            ARRAY[
+                'arcade_total_district',
+                'arcade_yearly_city_trend',
+                'arcade_yearly_district_trend'
+            ],
+            index
+        )
+    ),
+    'storefront',
+    NOW(),
+    NOW()
+ON CONFLICT (index) DO UPDATE
+    SET name       = EXCLUDED.name,
+        components = EXCLUDED.components,
+        icon       = EXCLUDED.icon,
+        updated_at = NOW();
+
+
+-- ============================================================
+-- 5. dashboard_groups 表（加入 metrotaipei group）
+-- ============================================================
+
+INSERT INTO public.dashboard_groups (dashboard_id, group_id)
+SELECT d.id, g.id
+FROM public.dashboards d
+CROSS JOIN public.groups g
+WHERE d.index = 'arcade-leveling'
+  AND g.name IN ('public', 'metrotaipei')
+ON CONFLICT DO NOTHING;
+
+
+-- ============================================================
+-- 驗證
+-- ============================================================
+SELECT
+    c.id,
+    c.index,
+    c.name,
+    cc.types,
+    qc.city,
+    qc.query_type
+FROM public.components c
+JOIN public.component_charts cc ON c.index = cc.index
+JOIN public.query_charts qc     ON c.index = qc.index
+WHERE c.index LIKE 'arcade_%'
+ORDER BY c.index, qc.city;
