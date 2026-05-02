@@ -333,13 +333,13 @@ INSERT INTO public.query_charts (
     'static', NULL, NULL, NULL,
     '臺北市政府工務局',
     '台北市各行政區騎樓整平長度佔人行道總長度比例。',
-    '以行政區圖與長條圖呈現台北市各行政區騎樓整平累積長度佔 OSM 人行道網絡總長度的比例。萬華、大同等核心舊城區比例超過 100%，反映 1990 年代大規模整平政策的高密度執行。士林、北投、內湖等面積較大行政區的人行道網絡廣，比例相對較低。',
+    '以行政區圖與長條圖呈現台北市各行政區騎樓整平累積長度佔 OSM 人行道網絡總長度的比例，上限封頂 100%。萬華、大同等核心舊城區涵蓋率最高，士林、北投、內湖等面積較大行政區的人行道網絡廣，比例相對較低。',
     '評估台北市各行政區的騎樓整平覆蓋程度，識別整平密度高與覆蓋不足的行政區，協助優化步行空間資源分配。',
     ARRAY['https://data.taipei/'],
     ARRAY['b12705030'],
     NOW(), NOW(),
     'two_d',
-    E'SELECT p.district AS x_axis,\n       ROUND((COALESCE(a.total_length_m, 0) / p.walk_length_m * 100)::numeric, 1)::FLOAT AS data\nFROM public.pedestrian_length_by_district p\nLEFT JOIN public.arcade_total_by_district a\n    ON p.district = a.district AND a.city = ''台北市''\nWHERE p.city = ''台北市'' AND p.walk_length_m > 0\nORDER BY data DESC',
+    E'SELECT p.district AS x_axis,\n       ROUND(LEAST(COALESCE(a.total_length_m, 0) / p.walk_length_m * 100, 100)::numeric, 1)::FLOAT AS data\nFROM public.pedestrian_length_by_district p\nLEFT JOIN public.arcade_total_by_district a\n    ON p.district = a.district AND a.city = ''台北市''\nWHERE p.city = ''台北市'' AND p.walk_length_m > 0\nORDER BY data DESC',
     NULL,
     'taipei'
 );
@@ -363,16 +363,14 @@ INSERT INTO public.query_charts (
     ARRAY['b12705030'],
     NOW(), NOW(),
     'two_d',
-    E'SELECT p.district AS x_axis,\n       ROUND((COALESCE(a.total_length_m, 0) / p.walk_length_m * 100)::numeric, 1)::FLOAT AS data\nFROM public.pedestrian_length_by_district p\nLEFT JOIN public.arcade_total_by_district a\n    ON p.district = a.district AND a.city = ''新北市''\nWHERE p.city = ''新北市'' AND p.walk_length_m > 0\nORDER BY data DESC',
+    E'SELECT p.district AS x_axis,\n       ROUND(LEAST(COALESCE(a.total_length_m, 0) / p.walk_length_m * 100, 100)::numeric, 1)::FLOAT AS data\nFROM public.pedestrian_length_by_district p\nLEFT JOIN public.arcade_total_by_district a\n    ON p.district = a.district AND a.city = ''新北市''\nWHERE p.city = ''新北市'' AND p.walk_length_m > 0\nORDER BY data DESC',
     NULL,
     'newtaipei'
 );
 
--- ── 雙北版本（城市內相對比例，改善 DistrictChart 色差）──────────
--- 注意：直接比較雙北的原始比例時，台北（0–1113%）遠大於新北（0–83%），
---       DistrictChart 色階會讓新北各區幾乎透明。
---       改以各城市內的最大比例作分母（city-max normalized），
---       讓兩市均能清楚呈現空間分佈差異。
+-- ── 雙北版本（實際比值，封頂 100%）────────────────────────────
+-- 封頂後台北最高 100%、新北最高約 83%，同一色階即可呈現差距，
+-- 不再需要 city-max 歸一化，且切換城市前後數值一致。
 INSERT INTO public.query_charts (
     index, history_config, map_config_ids, map_filter,
     time_from, time_to, update_freq, update_freq_unit,
@@ -384,14 +382,14 @@ INSERT INTO public.query_charts (
     NULL, '{}', '{}',
     'static', NULL, NULL, NULL,
     '臺北市政府工務局、新北市政府工務局',
-    '雙北各行政區騎樓整平涵蓋率（城市內相對值）。',
-    '以行政區圖與長條圖呈現雙北各行政區騎樓整平長度相對於所屬城市最高行政區的比例。台北以萬華（最高）、新北以永和（最高）為基準，設為 100；其他行政區依比例遞減。台北舊城核心（萬華、大同、大安）與新北永和呈現最高涵蓋率。',
-    '比較雙北兩市在各行政區的騎樓整平相對涵蓋程度，識別整平政策執行力強弱的空間分佈差異。',
+    '雙北各行政區騎樓整平涵蓋率（上限 100%）。',
+    '以行政區圖與長條圖呈現雙北各行政區騎樓整平長度佔 OSM 人行道網絡總長度的比例，上限封頂 100%。台北舊城核心（萬華、大同、大安）及新北永和涵蓋率最高，山區行政區（烏來、坪林）整平量趨近於零。',
+    '比較雙北各行政區的騎樓整平涵蓋程度，識別整平覆蓋高與不足的空間差異，協助政府優化步行改善資源分配。',
     ARRAY['https://data.taipei/', 'https://data.ntpc.gov.tw/'],
     ARRAY['b12705030'],
     NOW(), NOW(),
     'two_d',
-    E'WITH ratios AS (\n    SELECT p.district,\n           p.city,\n           COALESCE(a.total_length_m, 0) / p.walk_length_m * 100 AS ratio\n    FROM public.pedestrian_length_by_district p\n    LEFT JOIN public.arcade_total_by_district a\n        ON p.district = a.district AND p.city = a.city\n    WHERE p.walk_length_m > 0\n),\ncity_max AS (\n    SELECT city, MAX(ratio) AS max_ratio\n    FROM ratios\n    GROUP BY city\n)\nSELECT r.district AS x_axis,\n       ROUND((r.ratio / cm.max_ratio * 100)::numeric, 1)::FLOAT AS data\nFROM ratios r\nJOIN city_max cm ON r.city = cm.city\nORDER BY r.ratio DESC',
+    E'SELECT p.district AS x_axis,\n       ROUND(LEAST(COALESCE(a.total_length_m, 0) / p.walk_length_m * 100, 100)::numeric, 1)::FLOAT AS data\nFROM public.pedestrian_length_by_district p\nLEFT JOIN public.arcade_total_by_district a\n    ON p.district = a.district AND p.city = a.city\nWHERE p.walk_length_m > 0\nORDER BY data DESC',
     NULL,
     'metrotaipei'
 );
