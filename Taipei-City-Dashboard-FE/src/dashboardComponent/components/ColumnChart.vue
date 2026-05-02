@@ -40,99 +40,109 @@ const chartWidth = computed(() => {
 });
 
 
-const chartOptions = ref({
-	chart: {
-		stacked: true,
-		zoom: {
-			allowMouseWheelZoom: false,
-		},
-		toolbar: isLargeDataSet.value 
-			? {
-				show: true,
-				tools: {
-					download: false,
-					pan: false,
-					reset: "<p>" + "重置" + "</p>",
-					zoomin: false,
-					zoomout: false,
+const isDiffMode = computed(() => {
+	const data = props.series?.[0]?.data;
+	if (!Array.isArray(data) || (props.chart_config?.color?.length ?? 0) < 2) return false;
+	return data.some(v => typeof v === 'number' && v < 0);
+});
+
+const chartOptions = computed(() => {
+	const diffColors = isDiffMode.value
+		? props.series[0].data.map(v => v >= 0 ? props.chart_config.color[0] : props.chart_config.color[1])
+		: null;
+
+	return {
+		chart: {
+			stacked: false,
+			zoom: {
+				allowMouseWheelZoom: false,
+			},
+			toolbar: isLargeDataSet.value
+				? {
+					show: true,
+					tools: {
+						download: false,
+						pan: false,
+						reset: "<p>" + "重置" + "</p>",
+						zoomin: false,
+						zoomout: false,
+					}
+				  }
+				: {
+					show: false,
 				}
+		},
+		colors: diffColors || [...props.chart_config.color],
+		dataLabels: {
+			enabled: props.chart_config.categories ? false : true,
+			offsetY: 20,
+		},
+		grid: {
+			show: false,
+		},
+		legend: isDiffMode.value
+			? { show: false }
+			: isLargeDataSet.value
+			? {
+				show: props.chart_config.categories ? true : false,
+				horizontalAlign: "left",
+				offsetX: 20,
+				floating: true,
 			  }
 			: {
-				show: false,
-			}
-	},
-	colors: [...props.chart_config.color],
-	dataLabels: {
-		enabled: props.chart_config.categories ? false : true,
-		offsetY: 20,
-	},
-	grid: {
-		show: false,
-	},
-	legend: isLargeDataSet.value
-		? {
-			show: props.chart_config.categories ? true : false,
-			horizontalAlign: "left",
-			offsetX: 20,
-			floating: true,
-		  }
-		: {
-			show: props.chart_config.categories ? true : false,
-		  },
-	plotOptions: {
-		bar: {
-			borderRadius: 5,
-			dataLabels: {
-				hideOverflowingLabels: false
+				show: props.chart_config.categories ? true : false,
+			  },
+		plotOptions: {
+			bar: {
+				borderRadius: 5,
+				distributed: isDiffMode.value,
+				dataLabels: {
+					hideOverflowingLabels: false
+				},
 			},
 		},
-	},
-	stroke: {
-		colors: ["#282a2c"],
-		show: true,
-		width: 2,
-	},
-	tooltip: {
-		// The class "chart-tooltip" could be edited in /assets/styles/chartStyles.css
-		custom: function ({
-			series,
-			seriesIndex,
-			dataPointIndex,
-			w,
-		}) {
-			return (
-				'<div class="chart-tooltip">' +
-					"<h6>" +
-						w.globals.labels[dataPointIndex] +
-						`${
-							props.chart_config.categories
-								? "-" + w.globals.seriesNames[seriesIndex]
-								: ""
-						}` +
-					"</h6>" +
-					"<span>" +
-						series[seriesIndex][dataPointIndex] +
-						` ${props.chart_config.unit}` +
-					"</span>" +
-				"</div>"
-			);
+		stroke: {
+			colors: ["#282a2c"],
+			show: true,
+			width: 2,
 		},
-	},
-	xaxis: {
-		axisBorder: {
-			show: false,
+		tooltip: {
+			// The class "chart-tooltip" could be edited in /assets/styles/chartStyles.css
+			custom: function ({
+				series,
+				seriesIndex,
+				dataPointIndex,
+				w,
+			}) {
+				return (
+					'<div class="chart-tooltip">' +
+						"<h6>" +
+							w.globals.labels[dataPointIndex] +
+						"</h6>" +
+						"<span>" +
+							series[seriesIndex][dataPointIndex] +
+							` ${props.chart_config.unit}` +
+						"</span>" +
+					"</div>"
+				);
+			},
 		},
-		axisTicks: {
-			show: false,
+		xaxis: {
+			axisBorder: {
+				show: false,
+			},
+			axisTicks: {
+				show: false,
+			},
+			categories: props.chart_config.categories
+				? props.chart_config.categories
+				: [],
+			labels: {
+				offsetY: 2,
+			},
+			type: "category",
 		},
-		categories: props.chart_config.categories
-			? props.chart_config.categories
-			: [],
-		labels: {
-			offsetY: 2,
-		},
-		type: "category",
-	},
+	};
 });
 
 const selectedIndex = ref(null);
