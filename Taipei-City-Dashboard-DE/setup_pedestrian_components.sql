@@ -24,7 +24,7 @@ INSERT INTO public.component_charts (index, color, types, unit) VALUES
         ARRAY['DistrictChart'],
         '件'),
     ('traffic_pedestrian_hourly_taipei',
-        ARRAY['#FFF9C4', '#FF6F00', '#B71C1C'],
+        ARRAY['#B71C1C', '#FF6F00', '#FFF9C4'],
         ARRAY['HeatmapChart'],
         '件'),
     ('traffic_pedestrian_yearly_trend',
