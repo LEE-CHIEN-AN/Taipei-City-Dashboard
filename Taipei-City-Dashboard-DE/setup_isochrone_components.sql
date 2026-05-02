@@ -3,6 +3,14 @@
 -- 需先確認 isochrone_*_walk*.geojson 已放至 FE/public/mapData/
 
 -- ============================================================
+-- 0. 確保 component_charts 有 stacked / scrollable 欄位
+--    （冪等，已存在時不報錯）
+-- ============================================================
+ALTER TABLE public.component_charts ADD COLUMN IF NOT EXISTS stacked    boolean DEFAULT false;
+ALTER TABLE public.component_charts ADD COLUMN IF NOT EXISTS scrollable boolean DEFAULT false;
+
+
+-- ============================================================
 -- 1. components
 -- ============================================================
 
@@ -17,23 +25,25 @@ ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 -- 2. component_charts（MapLegend 等時圈圖例（可點擊篩選）+ ColumnChart 長條圖 + DistrictChart 行政區覆蓋圖）
 -- ============================================================
 
-INSERT INTO public.component_charts (index, color, types, unit) VALUES
+INSERT INTO public.component_charts (index, color, types, unit, stacked, scrollable) VALUES
     ('transit_isochrone_bus',
         ARRAY['#FFF176', '#FF9800', '#E53935'],
         ARRAY['MapLegend','ColumnChart','DistrictChart'],
-        '%'),
+        '%', true, false),
     ('transit_isochrone_mrt',
         ARRAY['#80DEEA', '#0097A7', '#004D40'],
         ARRAY['MapLegend','ColumnChart','DistrictChart'],
-        '%'),
+        '%', true, false),
     ('transit_isochrone_tra',
         ARRAY['#CE93D8', '#7B1FA2', '#311B92'],
         ARRAY['MapLegend','ColumnChart','DistrictChart'],
-        '%')
+        '%', true, false)
 ON CONFLICT (index) DO UPDATE
-    SET color = EXCLUDED.color,
-        types = EXCLUDED.types,
-        unit  = EXCLUDED.unit;
+    SET color      = EXCLUDED.color,
+        types      = EXCLUDED.types,
+        unit       = EXCLUDED.unit,
+        stacked    = EXCLUDED.stacked,
+        scrollable = EXCLUDED.scrollable;
 
 
 -- ============================================================

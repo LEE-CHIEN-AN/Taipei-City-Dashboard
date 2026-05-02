@@ -143,11 +143,20 @@ VALUES
 -- PART 2: Dashboardmanager DB（Component 設定）
 -- ============================================================
 
--- 模組圖表樣式設定
-INSERT INTO public.component_charts (index, color, types, unit) VALUES
-    ('population_flow_daytime',  '{"#F8CF58","#F5AD4A"}', '{"DistrictChart","ColumnChart"}', '人'),
-    ('population_flow_nighttime','{"#24B0DD","#10294A"}', '{"DistrictChart","ColumnChart"}', '人'),
-    ('population_flow_diff',     '{"#F5A623","#24B0DD"}', '{"DistrictChart","ColumnChart"}', '人');
+-- 確保 scrollable 欄位存在（冪等）
+ALTER TABLE public.component_charts ADD COLUMN IF NOT EXISTS stacked    boolean DEFAULT false;
+ALTER TABLE public.component_charts ADD COLUMN IF NOT EXISTS scrollable boolean DEFAULT false;
+
+-- 模組圖表樣式設定（scrollable = true：啟用捲動工具列）
+INSERT INTO public.component_charts (index, color, types, unit, scrollable) VALUES
+    ('population_flow_daytime',  '{"#F8CF58","#F5AD4A"}', '{"DistrictChart","ColumnChart"}', '人', true),
+    ('population_flow_nighttime','{"#24B0DD","#10294A"}', '{"DistrictChart","ColumnChart"}', '人', true),
+    ('population_flow_diff',     '{"#F5A623","#24B0DD"}', '{"DistrictChart","ColumnChart"}', '人', true)
+ON CONFLICT (index) DO UPDATE
+    SET color      = EXCLUDED.color,
+        types      = EXCLUDED.types,
+        unit       = EXCLUDED.unit,
+        scrollable = EXCLUDED.scrollable;
 
 -- 地圖圖層設定
 -- fill-opacity 的靜態值（0.3）僅作為圖層載入前的初始顯示；

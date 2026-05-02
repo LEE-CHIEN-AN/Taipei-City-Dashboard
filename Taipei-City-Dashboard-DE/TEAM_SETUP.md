@@ -1,6 +1,6 @@
-# 行人安全 + 大眾運輸等時圈 + 雙北人行道路網 — 環境設定指南
+# 行人安全 + 大眾運輸等時圈 + 人口流量 + 雙北人行道路網 — 環境設定指南
 
-> 適用分支：`feature/sidewalk`
+> 適用分支：`develop`（或 `feature/transit-isochrone`）
 > 前提：已完成官方 Docker 環境設定（能跑起來基本 Dashboard，`localhost` 有畫面）
 
 ---
@@ -10,7 +10,8 @@
 | 功能 | 說明 |
 |------|------|
 | 行人安全地圖 | 雙北行人事故熱區、時段分析、年度趨勢、高風險路口排名、AI 報告 |
-| 大眾運輸步行等時圈 | 捷運／公車／台鐵站 5/10/15 分鐘步行覆蓋等時圈，可點圖例篩選 |
+| 大眾運輸步行等時圈 | 捷運／公車／台鐵站 5/10/15 分鐘步行覆蓋等時圈，可點圖例篩選，長條圖疊加顯示 |
+| 人口流量（電信信令） | 雙北各行政區平日日間／夜間活動人數及差異，可捲動長條圖 |
 | 雙北人行道路網圖資 | 地圖交叉比對頁 → 圖資資訊，以金黃色線條顯示 OSM 人行道路網 |
 
 ---
@@ -23,8 +24,8 @@
 
 ```powershell
 git fetch origin
-git checkout feature/sidewalk
-git pull origin feature/sidewalk
+git checkout develop
+git pull origin develop
 ```
 
 ---
@@ -77,7 +78,22 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
 
 ---
 
-### 步驟五：設定人行道路網圖資組件
+### 步驟五：匯入人口流量資料
+
+```powershell
+docker cp db-sample-data/population_flow_migration.sql postgres-data:/tmp/pop_flow.sql
+docker exec postgres-data psql -U postgres -d dashboard -f /tmp/pop_flow.sql
+
+docker cp db-sample-data/population_flow_migration.sql postgres-manager:/tmp/pop_flow_mgr.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/pop_flow_mgr.sql
+```
+
+> 同一份 SQL 需要跑兩次：第一次匯入資料（`dashboard` DB），第二次設定組件（`dashboardmanager` DB）。  
+> 兩個 DB 執行同一份 SQL 時，各自只會執行對應自己的 PART（另一個 PART 的 table 不存在時會報錯，可忽略）。
+
+---
+
+### 步驟六：設定人行道路網圖資組件
 
 ```powershell
 docker cp Taipei-City-Dashboard-DE/setup_sidewalk_components.sql postgres-manager:/tmp/setup_sidewalk.sql
@@ -86,7 +102,7 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 
 ---
 
-### 步驟六：重啟後端與前端
+### 步驟七：重啟後端與前端
 
 ```powershell
 docker restart dashboard-be
@@ -98,7 +114,7 @@ docker restart dashboard-fe
 
 ---
 
-### 步驟七：重新整理瀏覽器
+### 步驟八：重新整理瀏覽器
 
 按 **Ctrl+Shift+R**（強制清除快取重整，不是一般 F5）
 
@@ -108,8 +124,8 @@ docker restart dashboard-fe
 
 ```powershell
 git fetch origin
-git checkout feature/sidewalk
-git pull origin feature/sidewalk
+git checkout develop
+git pull origin develop
 
 docker cp Taipei-City-Dashboard-DE/setup_pedestrian_components.sql postgres-manager:/tmp/setup_pedestrian.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_pedestrian.sql
@@ -120,6 +136,7 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 docker cp Taipei-City-Dashboard-DE/setup_sidewalk_components.sql postgres-manager:/tmp/setup_sidewalk.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_sidewalk.sql
 
+docker restart dashboard-be
 docker restart dashboard-fe
 ```
 
@@ -134,6 +151,7 @@ docker restart dashboard-fe
 | 行人安全地圖 | `http://localhost/mapview?index=pedestrian-safety&city=metrotaipei` |
 | 大眾運輸等時圈（地圖） | `http://localhost/mapview?index=transit-isochrone&city=metrotaipei` |
 | 等時圈儀表板（圖表） | `http://localhost/dashboard?index=transit-isochrone&city=metrotaipei` |
+| 人口流量儀表板 | `http://localhost/dashboard?index=population-flow&city=metrotaipei` |
 | 人行道路網圖資 | `http://localhost/mapview?index=map-layers-metrotaipei&city=metrotaipei` |
 
 ---
@@ -148,15 +166,25 @@ docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM
 # 等時圈覆蓋率
 docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.isochrone_district_coverage;"
 
+# 人口流量資料
+docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.population_flow_daytime;"
+docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.population_flow_nighttime;"
+
 # 人行道路網組件
-docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.index, qc.city, cm.index AS map_index FROM public.components c JOIN public.query_charts qc ON c.index = qc.index JOIN public.component_maps cm ON cm.id = ANY(qc.map_config_ids) WHERE c.index = 'sidewalk_osm' ORDER BY qc.city;"
+docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.index, qc.city FROM public.components c JOIN public.query_charts qc ON c.index = qc.index WHERE c.index = 'sidewalk_osm' ORDER BY qc.city;"
+
+# component_charts 欄位確認（stacked / scrollable）
+docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT index, stacked, scrollable FROM public.component_charts WHERE index LIKE '%isochrone%' OR index LIKE '%population_flow%';"
 ```
 
 預期結果：
 - `traffic_pedestrian_accident_taipei`：數千筆
 - `traffic_pedestrian_accident_ntpc`：數千筆
-- `isochrone_district_coverage`：123 筆（台北 12 區 × 3 交通工具 + 雙北 41 區 × 3）
+- `isochrone_district_coverage`：123 筆（台北 12 區 × 3 交通工具 + 新北 29 區 × 3）
+- `population_flow_daytime`：41 筆
+- `population_flow_nighttime`：41 筆
 - `sidewalk_osm`：應出現 3 列（metrotaipei 兩個、taipei 一個）
+- 等時圈 `stacked = t`、人口流量 `scrollable = t`
 
 ---
 
@@ -176,8 +204,16 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.i
 - 確認 Docker 有在跑：`docker ps`
 - 確認 `docker/.env` 裡有 `DB_DASHBOARD_PASSWORD`
 
+**Q：等時圈長條圖沒有疊加（顯示為分組而非疊加）？**
+- 確認有重新跑步驟四（`setup_isochrone_components.sql`），這個 SQL 會設定 `stacked = true`
+- 確認有重啟 `dashboard-be`
+
+**Q：人口流量長條圖沒有捲動工具列？**
+- 確認有跑步驟五（`population_flow_migration.sql`），這個 SQL 會設定 `scrollable = true`
+- 確認有重啟 `dashboard-be`
+
 **Q：人行道路網 toggle 打開後地圖沒有出現金黃色線條？**
-- 確認有執行步驟五（setup_sidewalk_components.sql）
+- 確認有執行步驟六（setup_sidewalk_components.sql）
 - 確認有重啟 `dashboard-fe`（`docker restart dashboard-fe`）
 - 重整後等待約 3–10 秒讓 21 MB GeoJSON 載入完成
 
@@ -186,6 +222,3 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.i
 
 **Q：AI 分析按鈕沒有回應？**
 - 確認 `docker/.env` 裡有設定 `ANTHROPIC_API_KEY`
-
-**Q：ColumnChart 疊加順序錯誤（5分鐘不在底層）？**
-- 重新跑步驟四的 `setup_isochrone_components.sql` 即可
