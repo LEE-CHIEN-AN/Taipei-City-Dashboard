@@ -196,12 +196,42 @@ function decreaseWidth() {
 function resetWidth() {
 	widthValue.value = initialWidth.value;
 }
+
+const drag = ref({ active: false, startX: 0, scrollLeft: 0 });
+
+function startDrag(e) {
+	if (!isLargeDataSet.value) return;
+	drag.value = {
+		active: true,
+		startX: e.pageX,
+		startY: e.pageY,
+		scrollLeft: e.currentTarget.scrollLeft,
+		scrollTop: e.currentTarget.scrollTop,
+	};
+	e.currentTarget.style.cursor = "grabbing";
+}
+
+function onDrag(e) {
+	if (!drag.value.active) return;
+	e.preventDefault();
+	e.currentTarget.scrollLeft = drag.value.scrollLeft - (e.pageX - drag.value.startX);
+	e.currentTarget.scrollTop = drag.value.scrollTop - (e.pageY - drag.value.startY);
+}
+
+function stopDrag(e) {
+	drag.value.active = false;
+	e.currentTarget.style.cursor = "";
+}
 </script>
 
 <template>
   <div
     v-if="activeChart === 'ColumnChart'"
     class="columnChart"
+    @mousedown="startDrag"
+    @mousemove="onDrag"
+    @mouseup="stopDrag"
+    @mouseleave="stopDrag"
   >
     <div
       v-if="isLargeDataSet"
@@ -243,6 +273,7 @@ function resetWidth() {
 	overflow: auto;
 	position: relative;
 	height: 100%;
+	cursor: grab;
 
 	.vue-apexcharts {
 		justify-content: unset !important;
