@@ -7,11 +7,10 @@
 -- ============================================================
 
 INSERT INTO public.components (index, name) VALUES
-    ('traffic_pedestrian_heatmap',         '雙北行人事故熱區'),
-    ('traffic_pedestrian_hourly_taipei',   '雙北行人事故時段分析'),
-    ('traffic_pedestrian_yearly_trend',    '雙北行人事故年度趨勢'),
-    ('traffic_pedestrian_hotspot_ranking', '行人事故高風險路口排名'),
-    ('traffic_pedestrian_ai_report',       'AI 路口安全報告')
+    ('traffic_pedestrian_heatmap',         '行人事故熱區'),
+    ('traffic_pedestrian_hourly_taipei',   '行人事故時段分析'),
+    ('traffic_pedestrian_yearly_trend',    '行人事故年度趨勢'),
+    ('traffic_pedestrian_hotspot_ranking', '行人事故高風險路口排名')
 ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 
 
@@ -25,7 +24,7 @@ INSERT INTO public.component_charts (index, color, types, unit) VALUES
         ARRAY['DistrictChart'],
         '件'),
     ('traffic_pedestrian_hourly_taipei',
-        ARRAY['#FFF9C4', '#FF6F00', '#B71C1C'],
+        ARRAY['#7B1818', '#B71C1C', '#FF6F00', '#FFD180', '#FFF9C4'],
         ARRAY['HeatmapChart'],
         '件'),
     ('traffic_pedestrian_yearly_trend',
@@ -35,11 +34,7 @@ INSERT INTO public.component_charts (index, color, types, unit) VALUES
     ('traffic_pedestrian_hotspot_ranking',
         ARRAY['#B71C1C'],
         ARRAY['BarChart'],
-        '件'),
-    ('traffic_pedestrian_ai_report',
-        ARRAY['#5eb3f0'],
-        ARRAY['AIHotspotReport'],
-        '')
+        '件')
 ON CONFLICT (index) DO UPDATE
     SET color = EXCLUDED.color,
         types = EXCLUDED.types,
@@ -104,8 +99,18 @@ ON CONFLICT (index) DO UPDATE
         paint    = EXCLUDED.paint,
         property = EXCLUDED.property;
 
--- 取得剛剛插入的 component_maps id 備用
--- (假設為自動序列，查詢: SELECT id FROM component_maps WHERE index='traffic_pedestrian_heatmap')
+-- 台北市專用 map config（下拉選單切換用）
+INSERT INTO public.component_maps (index, title, type, source, size, icon, paint, property)
+SELECT 'traffic_pedestrian_heatmap_taipei', '行人事故熱點(臺北)', type, source, size, icon, paint, property
+FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap'
+ON CONFLICT (index) DO UPDATE
+    SET title    = EXCLUDED.title,
+        type     = EXCLUDED.type,
+        source   = EXCLUDED.source,
+        size     = EXCLUDED.size,
+        icon     = EXCLUDED.icon,
+        paint    = EXCLUDED.paint,
+        property = EXCLUDED.property;
 
 
 -- ============================================================
@@ -167,6 +172,29 @@ INSERT INTO public.query_charts (
     'metrotaipei'
 );
 
+-- C1-taipei：臺北市版本（下拉選單用）
+INSERT INTO public.query_charts (
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, created_at, updated_at,
+    query_type, query_chart, query_history, city
+)
+SELECT
+    index, history_config,
+    (SELECT ARRAY[id] FROM public.component_maps WHERE index = 'traffic_pedestrian_heatmap_taipei' LIMIT 1),
+    map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, NOW(), NOW(),
+    'two_d',
+    E'SELECT district_name AS x_axis, SUM(accident_count)::INT AS data\nFROM traffic_pedestrian_district_stats\nWHERE city_name = ''臺北市''\nGROUP BY district_name\nORDER BY x_axis',
+    NULL,
+    'taipei'
+FROM public.query_charts
+WHERE index = 'traffic_pedestrian_heatmap' AND city = 'metrotaipei'
+ON CONFLICT DO NOTHING;
+
 -- C2：雙北行人事故時段分析（三個 city 版本，對應後端 query_charts.city 篩選）
 
 -- 共用 SQL 片段（CASE weekday）抽出為說明，實際各版本重複寫入
@@ -198,36 +226,6 @@ INSERT INTO public.query_charts (
     E'SELECT\n    hour::text AS x_axis,\n    CASE EXTRACT(ISODOW FROM make_date(\n        GREATEST(year::int, 2022),\n        GREATEST(month::int, 1),\n        1\n    ))\n        WHEN 1 THEN ''週一''\n        WHEN 2 THEN ''週二''\n        WHEN 3 THEN ''週三''\n        WHEN 4 THEN ''週四''\n        WHEN 5 THEN ''週五''\n        WHEN 6 THEN ''週六''\n        WHEN 7 THEN ''週日''\n    END AS y_axis,\n    COUNT(*)::INT AS data\nFROM traffic_pedestrian_accident_taipei\nWHERE year >= 2022 AND hour IS NOT NULL AND month IS NOT NULL\nGROUP BY hour, y_axis\nORDER BY hour, y_axis',
     NULL,
     'taipei'
-);
-
--- city = ntpc：只查新北市
-INSERT INTO public.query_charts (
-    index, history_config, map_config_ids, map_filter,
-    time_from, time_to, update_freq, update_freq_unit,
-    source, short_desc, long_desc, use_case,
-    links, contributors, created_at, updated_at,
-    query_type, query_chart, query_history, city
-) VALUES (
-    'traffic_pedestrian_hourly_taipei',
-    NULL,
-    '{}',
-    '{}',
-    'year_start',
-    'now',
-    1,
-    'year',
-    '內政部警政署',
-    '新北市行人事故依小時與星期幾的分布熱力格。',
-    '以熱力格（HeatmapChart）呈現新北市近三年行人事故在不同時段（0–23時）與不同星期的分布情形。',
-    '識別新北市行人事故高峰時段，協助交通規劃與執法資源配置。',
-    ARRAY['https://data.gov.tw/dataset/13139'],
-    ARRAY['b12705030'],
-    NOW(),
-    NOW(),
-    'three_d',
-    E'SELECT\n    hour::text AS x_axis,\n    CASE EXTRACT(ISODOW FROM make_date(\n        GREATEST(year::int, 2022),\n        GREATEST(month::int, 1),\n        1\n    ))\n        WHEN 1 THEN ''週一''\n        WHEN 2 THEN ''週二''\n        WHEN 3 THEN ''週三''\n        WHEN 4 THEN ''週四''\n        WHEN 5 THEN ''週五''\n        WHEN 6 THEN ''週六''\n        WHEN 7 THEN ''週日''\n    END AS y_axis,\n    COUNT(*)::INT AS data\nFROM traffic_pedestrian_accident_ntpc\nWHERE year >= 2022 AND hour IS NOT NULL AND month IS NOT NULL\nGROUP BY hour, y_axis\nORDER BY hour, y_axis',
-    NULL,
-    'newtaipei'
 );
 
 -- city = metrotaipei：雙北合計
@@ -288,7 +286,7 @@ INSERT INTO public.query_charts (
     NOW(),
     NOW(),
     'time',
-    E'SELECT\n    make_date(year::int, 1, 1) AS x_axis,\n    city AS y_axis,\n    accident_count AS data\nFROM traffic_pedestrian_yearly_trend\nWHERE year > 0\nORDER BY year, city',
+    E'SELECT\n    make_date(year::int, 1, 1) AS x_axis,\n    city AS y_axis,\n    MAX(accident_count)::int AS data\nFROM traffic_pedestrian_yearly_trend\nWHERE year > 0\nGROUP BY year, city\nORDER BY year, city',
     NULL,
     'metrotaipei'
 );
@@ -326,35 +324,26 @@ INSERT INTO public.query_charts (
     'metrotaipei'
 );
 
--- C5：AI 路口安全報告 (metrotaipei)
+-- C4-taipei：臺北市版本
 INSERT INTO public.query_charts (
     index, history_config, map_config_ids, map_filter,
     time_from, time_to, update_freq, update_freq_unit,
     source, short_desc, long_desc, use_case,
     links, contributors, created_at, updated_at,
     query_type, query_chart, query_history, city
-) VALUES (
-    'traffic_pedestrian_ai_report',
-    NULL,
-    '{}',
-    '{}',
-    'year_start',
-    'now',
-    1,
-    'year',
-    '內政部警政署、AI 分析（llama3.3-ffm-70b）',
-    '輸入路口名稱，AI 自動查詢事故統計並生成行人安全改善建議報告。',
-    '使用 Tool Calling 架構，AI 根據使用者輸入的路口名稱自動呼叫後端 API 查詢該路口的統計資料，並生成包含事故概況、風險因素與具體改善建議的白話報告，展現「數據 → AI 分析 → 行動建議」的完整閉環。',
-    '協助決策者快速了解特定路口的行人安全狀況，並取得具體可行的改善方向。',
-    ARRAY['https://data.gov.tw/dataset/13139'],
-    ARRAY['b12705030'],
-    NOW(),
-    NOW(),
-    'custom',
-    E'SELECT 1',
-    NULL,
-    'metrotaipei'
-);
+)
+SELECT
+    index, history_config, map_config_ids, map_filter,
+    time_from, time_to, update_freq, update_freq_unit,
+    source, short_desc, long_desc, use_case,
+    links, contributors, NOW(), NOW(),
+    query_type,
+    E'SELECT\n    COALESCE(\n        NULLIF(near_location, ''''),\n        ROUND(center_lng::numeric, 4)::text || '', '' || ROUND(center_lat::numeric, 4)::text\n    ) AS x_axis,\n    accident_count AS data\nFROM traffic_pedestrian_hotspot\nWHERE city = ''taipei''\nORDER BY accident_count DESC\nLIMIT 20',
+    query_history,
+    'taipei'
+FROM public.query_charts
+WHERE index = 'traffic_pedestrian_hotspot_ranking' AND city = 'metrotaipei'
+ON CONFLICT DO NOTHING;
 
 
 -- ============================================================
@@ -371,16 +360,14 @@ SELECT
             'traffic_pedestrian_heatmap',
             'traffic_pedestrian_hourly_taipei',
             'traffic_pedestrian_yearly_trend',
-            'traffic_pedestrian_hotspot_ranking',
-            'traffic_pedestrian_ai_report'
+            'traffic_pedestrian_hotspot_ranking'
         )
         ORDER BY ARRAY_POSITION(
             ARRAY[
                 'traffic_pedestrian_heatmap',
                 'traffic_pedestrian_hourly_taipei',
                 'traffic_pedestrian_yearly_trend',
-                'traffic_pedestrian_hotspot_ranking',
-                'traffic_pedestrian_ai_report'
+                'traffic_pedestrian_hotspot_ranking'
             ],
             index
         )
