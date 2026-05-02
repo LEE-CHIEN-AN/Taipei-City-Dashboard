@@ -54,7 +54,7 @@ INSERT INTO public.component_charts (index, color, types, unit) VALUES
             '#43A047', '#00ACC1', '#1E88E5',
             '#5E35B1', '#D81B60', '#8D6E63', '#FF7043'
         ],
-        ARRAY['DistrictChart', 'BarChart', 'DonutChart'],
+        ARRAY['DistrictChart', 'BarChart', 'DonutChart', 'MapLegend'],
         '公尺')
 ON CONFLICT (index) DO UPDATE
     SET color = EXCLUDED.color,
@@ -409,14 +409,12 @@ SELECT
         SELECT id FROM public.components
         WHERE index IN (
             'arcade_total_district',
-            'arcade_leveling_ratio',
-            'arcade_map_legend'
+            'arcade_leveling_ratio'
         )
         ORDER BY ARRAY_POSITION(
             ARRAY[
                 'arcade_total_district',
-                'arcade_leveling_ratio',
-                'arcade_map_legend'
+                'arcade_leveling_ratio'
             ],
             index
         )
