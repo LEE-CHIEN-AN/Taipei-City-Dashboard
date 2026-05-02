@@ -7,9 +7,9 @@
 -- ============================================================
 
 INSERT INTO public.components (index, name) VALUES
-    ('traffic_pedestrian_heatmap',         '雙北行人事故熱區'),
-    ('traffic_pedestrian_hourly_taipei',   '雙北行人事故時段分析'),
-    ('traffic_pedestrian_yearly_trend',    '雙北行人事故年度趨勢'),
+    ('traffic_pedestrian_heatmap',         '行人事故熱區'),
+    ('traffic_pedestrian_hourly_taipei',   '行人事故時段分析'),
+    ('traffic_pedestrian_yearly_trend',    '行人事故年度趨勢'),
     ('traffic_pedestrian_hotspot_ranking', '行人事故高風險路口排名')
 ON CONFLICT (index) DO UPDATE SET name = EXCLUDED.name;
 
@@ -24,7 +24,7 @@ INSERT INTO public.component_charts (index, color, types, unit) VALUES
         ARRAY['DistrictChart'],
         '件'),
     ('traffic_pedestrian_hourly_taipei',
-        ARRAY['#B71C1C', '#FF6F00', '#FFF9C4'],
+        ARRAY['#7B1818', '#B71C1C', '#FF6F00', '#FFD180', '#FFF9C4'],
         ARRAY['HeatmapChart'],
         '件'),
     ('traffic_pedestrian_yearly_trend',

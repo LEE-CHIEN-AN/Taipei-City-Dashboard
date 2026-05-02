@@ -87,11 +87,7 @@ const chartOptions = ref({
 		},
 	},
 	dataLabels: {
-		distributed: true,
-		style: {
-			fontSize: "12px",
-			fontWeight: "normal",
-		},
+		enabled: false,
 	},
 	grid: {
 		show: false,
