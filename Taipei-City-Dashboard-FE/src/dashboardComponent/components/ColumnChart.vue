@@ -21,22 +21,21 @@ const emits = defineEmits([
 	"fly"
 ]);
 
-const isLargeDataSet = computed(() => {
-	return props.series[0].data.length > 12
-})
+// 工具列（+ − 重置）只在 scrollable: true 的組件顯示（人口流量用）
+const isLargeDataSet = computed(() => props.chart_config.scrollable === true)
 
-// Calculate initial width for large datasets only
+// 捲動：超過 12 個 category 就橫向捲動（適用所有多類別圖表）
+const needsScroll = computed(() => props.series[0].data.length > 12)
+
 const initialWidth = computed(() => {
 	const WIDTH_PER_ITEM = 32
-	const itemCount = props.series[0].data.length;
-	return itemCount * WIDTH_PER_ITEM;
+	return props.series[0].data.length * WIDTH_PER_ITEM;
 });
 
 const widthValue = ref(initialWidth.value);
 
-// Convert to a string with unit for ApexCharts
 const chartWidth = computed(() => {
-	return isLargeDataSet.value ? `${widthValue.value}px` : "100%";
+	return needsScroll.value ? `${widthValue.value}px` : "100%";
 });
 
 
@@ -53,7 +52,7 @@ const chartOptions = computed(() => {
 
 	return {
 		chart: {
-			stacked: false,
+			stacked: props.chart_config.stacked ?? false,
 			zoom: {
 				allowMouseWheelZoom: false,
 			},
@@ -142,6 +141,9 @@ const chartOptions = computed(() => {
 			},
 			type: "category",
 		},
+		yaxis: props.chart_config.stacked
+			? { max: 100 }
+			: {},
 	};
 });
 

@@ -15,7 +15,27 @@ const dialogStore = useDialogStore();
 const contentStore = useContentStore();
 const authStore = useAuthStore();
 
+const KNOWN_DATASETS = {
+	"data.gov.tw/dataset/12818":  "即時交通事故資料（A1類）",
+	"data.gov.tw/dataset/13139":  "即時交通事故資料（A2類）",
+	"data.gov.tw/dataset/161199": "111年傷亡道路交通事故資料",
+	"data.gov.tw/dataset/167905": "112年傷亡道路交通事故資料",
+	"data.gov.tw/dataset/172969": "113年傷亡道路交通事故資料",
+	"data.gov.tw/dataset/177136": "114年傷亡道路交通事故資料",
+	"data.gov.tw/dataset/73226":  "臺鐵車站資料",
+	"48aa5bca-2a4f-4fb7-a658-43cba51d5d56": "臺北市公車站牌位置圖",
+	"758e5ae0-e6ee-448b-81f5-316eb68a5ba7": "臺北都會區捷運站點位圖",
+	"2f238b4f-1b27-4085-93e9-d684ef0e2735": "臺北市行人事故地點圖",
+	"34b402a8-53d9-483d-9406-24a682c2d6dc": "新北市公車站位資訊",
+	"tdx.transportdata.tw":        "TDX 交通資料平台（捷運站）",
+	"railway.gov.tw":              "台灣鐵路管理局",
+	"openstreetmap.org":           "OpenStreetMap",
+};
+
 function getLinkTag(link, index) {
+	for (const [key, name] of Object.entries(KNOWN_DATASETS)) {
+		if (link.includes(key)) return name;
+	}
 	if (link.includes("data.taipei")) {
 		return `資料集 - ${index + 1} (data.taipei)`;
 	} else if (link.includes("data.ntpc")) {
@@ -87,6 +107,7 @@ function getLinkTag(link, index) {
                 :key="contributor"
               >
                 <a
+                  v-if="contentStore.contributors[contributor]"
                   :href="
                     contentStore.contributors[contributor]
                       .link
@@ -234,8 +255,9 @@ function getLinkTag(link, index) {
 		}
 
 		&-links {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
 			margin: 0 0 var(--font-s);
 
 			a {

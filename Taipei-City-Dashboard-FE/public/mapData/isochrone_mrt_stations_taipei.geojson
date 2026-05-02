@@ -1,0 +1,1145 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.4672,
+          25.125785
+        ]
+      },
+      "properties": {
+        "name": "關渡站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.473122,
+          25.130751
+        ]
+      },
+      "properties": {
+        "name": "忠義站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.502531,
+          25.136936
+        ]
+      },
+      "properties": {
+        "name": "新北投站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.498591,
+          25.131907
+        ]
+      },
+      "properties": {
+        "name": "北投站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.501083,
+          25.125585
+        ]
+      },
+      "properties": {
+        "name": "奇岩站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.506265,
+          25.120858
+        ]
+      },
+      "properties": {
+        "name": "唭哩岸站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.515642,
+          25.11442
+        ]
+      },
+      "properties": {
+        "name": "石牌站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.51882,
+          25.109794
+        ]
+      },
+      "properties": {
+        "name": "明德站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.522542,
+          25.102811
+        ]
+      },
+      "properties": {
+        "name": "芝山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.520132,
+          25.07138
+        ]
+      },
+      "properties": {
+        "name": "圓山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.524969,
+          25.084236
+        ]
+      },
+      "properties": {
+        "name": "劍潭站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.526192,
+          25.093474
+        ]
+      },
+      "properties": {
+        "name": "士林站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.519363,
+          25.062877
+        ]
+      },
+      "properties": {
+        "name": "民權西路站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.52071,
+          25.057647
+        ]
+      },
+      "properties": {
+        "name": "雙連站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.520397,
+          25.052676
+        ]
+      },
+      "properties": {
+        "name": "中山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.51622,
+          25.041827
+        ]
+      },
+      "properties": {
+        "name": "臺大醫院站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.579325,
+          24.998277
+        ]
+      },
+      "properties": {
+        "name": "動物園站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.573176,
+          24.998253
+        ]
+      },
+      "properties": {
+        "name": "木柵站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.568067,
+          24.998608
+        ]
+      },
+      "properties": {
+        "name": "萬芳社區站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.558029,
+          24.999504
+        ]
+      },
+      "properties": {
+        "name": "萬芳醫院站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.55701,
+          25.005384
+        ]
+      },
+      "properties": {
+        "name": "辛亥站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.558827,
+          25.018523
+        ]
+      },
+      "properties": {
+        "name": "麟光站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.553058,
+          25.023845
+        ]
+      },
+      "properties": {
+        "name": "六張犁站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.543451,
+          25.025992
+        ]
+      },
+      "properties": {
+        "name": "科技大樓站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.543626,
+          25.032821
+        ]
+      },
+      "properties": {
+        "name": "大安站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.544216,
+          25.060806
+        ]
+      },
+      "properties": {
+        "name": "中山國中站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.607634,
+          25.052178
+        ]
+      },
+      "properties": {
+        "name": "南港站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.59302,
+          25.050189
+        ]
+      },
+      "properties": {
+        "name": "昆陽站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.582004,
+          25.044279
+        ]
+      },
+      "properties": {
+        "name": "後山埤站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.575873,
+          25.040864
+        ]
+      },
+      "properties": {
+        "name": "永春站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.565259,
+          25.041179
+        ]
+      },
+      "properties": {
+        "name": "市政府站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.557689,
+          25.041347
+        ]
+      },
+      "properties": {
+        "name": "國父紀念館",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.549656,
+          25.041495
+        ]
+      },
+      "properties": {
+        "name": "忠孝敦化站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.543794,
+          25.041602
+        ]
+      },
+      "properties": {
+        "name": "忠孝復興站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.528187,
+          25.020693
+        ]
+      },
+      "properties": {
+        "name": "台電大樓站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.540921,
+          24.993178
+        ]
+      },
+      "properties": {
+        "name": "景美站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.501221,
+          25.035229
+        ]
+      },
+      "properties": {
+        "name": "龍山寺站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.52334,
+          25.044813
+        ]
+      },
+      "properties": {
+        "name": "善導寺站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.510782,
+          25.035673
+        ]
+      },
+      "properties": {
+        "name": "小南門站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.517049,
+          25.034274
+        ]
+      },
+      "properties": {
+        "name": "中正紀念堂",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.522568,
+          25.026886
+        ]
+      },
+      "properties": {
+        "name": "古亭站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.532919,
+          25.042355
+        ]
+      },
+      "properties": {
+        "name": "忠孝新生站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.517438,
+          25.046233
+        ]
+      },
+      "properties": {
+        "name": "台北車站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.508488,
+          25.042213
+        ]
+      },
+      "properties": {
+        "name": "西門站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.617622,
+          25.054566
+        ]
+      },
+      "properties": {
+        "name": "南港展覽館站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.548149,
+          25.080477
+        ]
+      },
+      "properties": {
+        "name": "大直站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.567212,
+          25.082161
+        ]
+      },
+      "properties": {
+        "name": "西湖站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.575283,
+          25.079995
+        ]
+      },
+      "properties": {
+        "name": "港墘站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.584969,
+          25.078533
+        ]
+      },
+      "properties": {
+        "name": "文德站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.594206,
+          25.083506
+        ]
+      },
+      "properties": {
+        "name": "內湖站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.602313,
+          25.083809
+        ]
+      },
+      "properties": {
+        "name": "大湖公園站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.607242,
+          25.072689
+        ]
+      },
+      "properties": {
+        "name": "葫洲站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.611737,
+          25.067578
+        ]
+      },
+      "properties": {
+        "name": "東湖站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.615954,
+          25.059899
+        ]
+      },
+      "properties": {
+        "name": "南港軟體園區站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.544039,
+          25.052292
+        ]
+      },
+      "properties": {
+        "name": "南京復興站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.539002,
+          25.001965
+        ]
+      },
+      "properties": {
+        "name": "萬隆站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.534347,
+          25.014707
+        ]
+      },
+      "properties": {
+        "name": "公館站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.485208,
+          25.137447
+        ]
+      },
+      "properties": {
+        "name": "復興崗站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.533156,
+          25.057966
+        ]
+      },
+      "properties": {
+        "name": "行天宮站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.527664,
+          25.062651
+        ]
+      },
+      "properties": {
+        "name": "中山國小站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.53307,
+          25.052409
+        ]
+      },
+      "properties": {
+        "name": "松江南京站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.551635,
+          25.063104
+        ]
+      },
+      "properties": {
+        "name": "松山機場站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.512849,
+          25.062922
+        ]
+      },
+      "properties": {
+        "name": "大橋頭站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.528322,
+          25.033928
+        ]
+      },
+      "properties": {
+        "name": "東門站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.555607,
+          25.084898
+        ]
+      },
+      "properties": {
+        "name": "劍南路站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.56349,
+          25.032979
+        ]
+      },
+      "properties": {
+        "name": "台北101/世貿站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.535308,
+          25.033535
+        ]
+      },
+      "properties": {
+        "name": "大安森林公園站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.553233,
+          25.03315
+        ]
+      },
+      "properties": {
+        "name": "信義安和站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.570666,
+          25.032793
+        ]
+      },
+      "properties": {
+        "name": "象山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.543577,
+          25.05187
+        ]
+      },
+      "properties": {
+        "name": "南京復興站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.533049,
+          25.052025
+        ]
+      },
+      "properties": {
+        "name": "松江南京站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.577733,
+          25.050002
+        ]
+      },
+      "properties": {
+        "name": "松山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.564397,
+          25.051436
+        ]
+      },
+      "properties": {
+        "name": "南京三民站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.552003,
+          25.051647
+        ]
+      },
+      "properties": {
+        "name": "台北小巨蛋站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.510279,
+          25.049294
+        ]
+      },
+      "properties": {
+        "name": "北門站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.520397,
+          25.052676
+        ]
+      },
+      "properties": {
+        "name": "中山站",
+        "city": "taipei",
+        "type": "mrt"
+      }
+    }
+  ]
+}

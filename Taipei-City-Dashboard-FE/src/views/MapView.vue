@@ -176,6 +176,17 @@ function popularBasicLayerGA(map_config) {
 		});
 	}
 }
+
+function getAvailableCities(componentIndex) {
+	const allCities = contentStore.currentDashboard?.city
+		? contentStore.cityManager.getSelectList(contentStore.currentDashboard?.city)
+		: contentStore.cityManager.getCities(contentStore.cityManager.activeCities);
+	return allCities.filter((c) =>
+		contentStore.cityDashboard.components?.some(
+			(d) => d.index === componentIndex && d.city === c.value,
+		),
+	);
+}
 </script>
 
 <template>
@@ -303,23 +314,8 @@ function popularBasicLayerGA(map_config) {
           :info-btn="true"
           :active-city="item.city"
           :select-btn="true"
-          :select-btn-disabled="
-            contentStore.cityManager.getSelectList(
-              contentStore.currentDashboard?.city,
-            ).length === 1 ||
-              contentStore.currentDashboardExcluded.components.filter(
-                (data) => data.index === item.index,
-              ).length === 0
-          "
-          :select-btn-list="
-            contentStore.currentDashboard?.city
-              ? contentStore.cityManager.getSelectList(
-                contentStore.currentDashboard?.city,
-              )
-              : contentStore.cityManager.getCities(
-                contentStore.cityManager.activeCities,
-              )
-          "
+          :select-btn-disabled="getAvailableCities(item.index).length <= 1"
+          :select-btn-list="getAvailableCities(item.index)"
           :city-tag="
             contentStore.currentDashboard?.city
               ? contentStore.cityManager.getTagList(
@@ -502,81 +498,139 @@ function popularBasicLayerGA(map_config) {
             }
           "
         />
-        <h2 v-if="parseMapLayers.noMap?.length > 0">
+        <!-- Full-width noMap: HeatmapChart needs more vertical space -->
+        <template
+          v-for="(item, arrayIdx) in parseMapLayers.noMap"
+            :key="`map-layer-full-${item.index}-${item.city}`"
+        >
+          <DashboardComponent
+            v-if="item.chart_config?.types?.includes('HeatmapChart')"
+            :config="item"
+            mode="map"
+            :info-btn="true"
+            :active-city="item.city"
+            :select-btn="true"
+            :select-btn-disabled="getAvailableCities(item.index).length <= 1"
+            :select-btn-list="getAvailableCities(item.index)"
+            :city-tag="
+              contentStore.currentDashboard?.city
+                ? contentStore.cityManager.getTagList(
+                  contentStore.currentDashboard?.city,
+                )
+                : contentStore.cityManager.getTagList(item.city)
+            "
+            :toggle-on="toggleOn.noMap[arrayIdx]"
+            @info="
+              (item) => {
+                dialogStore.showMoreInfo(item);
+              }
+            "
+            @toggle="
+              (value, map_config) => {
+                handleToggle(value, map_config, item);
+                toggleSwitchBtn(value, 'noMap', arrayIdx);
+              }
+            "
+            @change-city="
+              (city) => {
+                const selectedData =
+                  contentStore.cityDashboard.components.find(
+                    (data) => {
+                      if (
+                        data.index === item.index &&
+                        data.city === city
+                      ) {
+                        return data;
+                      }
+                    },
+                  );
+                const componentIndex =
+                  contentStore.currentDashboard.components.findIndex(
+                    (data) =>
+                      data.index === item.index &&
+                      data.city === item.city,
+                  );
+
+                if (selectedData && componentIndex !== -1) {
+                  contentStore.setComponentData(
+                    componentIndex,
+                    selectedData,
+                  );
+                }
+              }
+            "
+          />
+        </template>
+        <!-- 2-column grid: other noMap components (DonutChart, etc.) -->
+        <h2 v-if="parseMapLayers.noMap?.some(i => !i.chart_config?.types?.includes('HeatmapChart'))">
           無空間資料組件
         </h2>
-        <DashboardComponent
-          v-for="(item, arrayIdx) in parseMapLayers.noMap"
-          :key="`map-layer-${item.index}-${item.city}`"
-          :config="item"
-          mode="map"
-          :info-btn="true"
-          :active-city="item.city"
-          :select-btn="true"
-          :select-btn-disabled="
-            contentStore.cityManager.getSelectList(
-              contentStore.currentDashboard?.city,
-            ).length === 1 ||
-              contentStore.currentDashboardExcluded.components.filter(
-                (data) => data.index === item.index,
-              ).length === 0
-          "
-          :select-btn-list="
-            contentStore.currentDashboard?.city
-              ? contentStore.cityManager.getSelectList(
-                contentStore.currentDashboard?.city,
-              )
-              : contentStore.cityManager.getCities(
-                contentStore.cityManager.activeCities,
-              )
-          "
-          :city-tag="
-            contentStore.currentDashboard?.city
-              ? contentStore.cityManager.getTagList(
-                contentStore.currentDashboard?.city,
-              )
-              : contentStore.cityManager.getTagList(item.city)
-          "
-          :toggle-on="toggleOn.noMap[arrayIdx]"
-          @info="
-            (item) => {
-              dialogStore.showMoreInfo(item);
-            }
-          "
-          @toggle="
-            (value, map_config) => {
-              handleToggle(value, map_config, item);
-              toggleSwitchBtn(value, 'noMap', arrayIdx);
-            }
-          "
-          @change-city="
-            (city) => {
-              const selectedData =
-                contentStore.cityDashboard.components.find(
-                  (data) => {
-                    if (
-                      data.index === item.index &&
-                      data.city === city
-                    ) {
-                      return data;
-                    }
-                  },
-                );
-              const componentIndex =
-                contentStore.currentDashboard.components.findIndex(
-                  (data) =>
-                    data.index === item.index &&
-                    data.city === item.city,
-                );
-              if (selectedData && componentIndex !== -1) {
-                contentStore.setComponentData(
-                  componentIndex,
-                  selectedData,
-                );
-              }
-            }
-          "
-        />
+        <div
+          v-if="parseMapLayers.noMap?.some(i => !i.chart_config?.types?.includes('HeatmapChart'))"
+          class="map-charts-nomap-grid"
+        >
+          <template
+            v-for="(item, arrayIdx) in parseMapLayers.noMap"
+            :key="`map-layer-half-${item.index}-${item.city}`"
+          >
+            <DashboardComponent
+              v-if="!item.chart_config?.types?.includes('HeatmapChart')"
+              :config="item"
+              mode="half"
+              :info-btn="true"
+              :active-city="item.city"
+              :select-btn="true"
+              :select-btn-disabled="getAvailableCities(item.index).length <= 1"
+              :select-btn-list="getAvailableCities(item.index)"
+              :city-tag="
+                contentStore.currentDashboard?.city
+                  ? contentStore.cityManager.getTagList(
+                    contentStore.currentDashboard?.city,
+                  )
+                  : contentStore.cityManager.getTagList(item.city)
+              "
+              :toggle-on="toggleOn.noMap[arrayIdx]"
+              @info="
+                (item) => {
+                  dialogStore.showMoreInfo(item);
+                }
+              "
+              @toggle="
+                (value, map_config) => {
+                  handleToggle(value, map_config, item);
+                  toggleSwitchBtn(value, 'noMap', arrayIdx);
+                }
+              "
+              @change-city="
+                (city) => {
+                  const selectedData =
+                    contentStore.cityDashboard.components.find(
+                      (data) => {
+                        if (
+                          data.index === item.index &&
+                          data.city === city
+                        ) {
+                          return data;
+                        }
+                      },
+                    );
+                  const componentIndex =
+                    contentStore.currentDashboard.components.findIndex(
+                      (data) =>
+                        data.index === item.index &&
+                        data.city === item.city,
+                    );
+                  if (selectedData && componentIndex !== -1) {
+                    contentStore.setComponentData(
+                      componentIndex,
+                      selectedData,
+                    );
+                  }
+                }
+              "
+            />
+          </template>
+        </div>
       </div>
       <!-- 3. If dashboard is still loading -->
       <div
@@ -627,7 +681,7 @@ function popularBasicLayerGA(map_config) {
 	position: relative;
 
 	&-charts {
-		width: 360px;
+		width: 460px;
 		max-height: 100%;
 		height: fit-content;
 		display: grid;
@@ -637,11 +691,17 @@ function popularBasicLayerGA(map_config) {
 		overflow-y: scroll;
 
 		@media (min-width: 1000px) {
-			width: 370px;
+			width: 500px;
 		}
 
 		@media (min-width: 2000px) {
-			width: 400px;
+			width: 540px;
+		}
+
+		&-nomap-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: var(--font-s);
 		}
 
 		&-nodashboard {

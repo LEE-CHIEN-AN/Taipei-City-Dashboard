@@ -737,7 +737,15 @@ export const useMapStore = defineStore("map", {
 			) {
 				config.filter = initialFilter;
 			}
-			this.map.addLayer(config);
+			if (map_config.type === "fill") {
+				const existingLayers = this.map.getStyle()?.layers || [];
+				const firstCircle = existingLayers.find(
+					(l) => l.type === "circle" && this.currentLayers.includes(l.id)
+				);
+				this.map.addLayer(config, firstCircle?.id);
+			} else {
+				this.map.addLayer(config);
+			}
 			if (
 				map_config.layerId ===
 					"wee_hazard_water-fill-extrusion-metrotaipei" ||
@@ -2391,6 +2399,10 @@ export const useMapStore = defineStore("map", {
 				return;
 			}
 			map_configs.map((map_config) => {
+				const props = map_config.property;
+				if (Array.isArray(props) && map_filter.byParam.xParam) {
+					if (!props.some((p) => p.key === map_filter.byParam.xParam)) return;
+				}
 				let mapLayerId = `${map_config.index}-${map_config.type}-${map_config.city}`;
 				if (map_config && map_config.type === "arc") {
 					this.deckGlLayer[mapLayerId].config.data = this.deckGlLayer[
