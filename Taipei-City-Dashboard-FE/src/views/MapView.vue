@@ -27,6 +27,7 @@ const dialogStore = useDialogStore();
 const mapStore = useMapStore();
 const route = useRoute();
 
+
 const toggleOn = ref({
 	hasMap: [],
 	noMap: [],
@@ -584,6 +585,7 @@ function popularBasicLayerGA(map_config) {
 	height: calc(var(--vh) * 100 - 127px);
 	display: flex;
 	margin: var(--font-m) var(--font-m);
+	position: relative;
 
 	&-charts {
 		width: 360px;

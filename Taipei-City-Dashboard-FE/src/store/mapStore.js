@@ -1809,7 +1809,6 @@ export const useMapStore = defineStore("map", {
 			);
 			return;
 		},
-		//  5. Turn on the visibility for a exisiting map layer
 		turnOnMapLayerVisibility(mapLayerId) {
 			if (mapLayerId.indexOf("-arc") !== -1) {
 				this.deckGlLayer[mapLayerId].config.visible = true;
