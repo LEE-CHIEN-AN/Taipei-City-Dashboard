@@ -215,7 +215,7 @@ function handleDataSelection(_e, _chartContext, config) {
     </div>
     <VueApexCharts
       width="100%"
-      height="360px"
+      height="220px"
       type="heatmap"
       :options="chartOptions"
       :series="series"
