@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.60706,
+          25.05348
+        ]
+      },
+      "properties": {
+        "name": "南港",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.57906,
+          25.04927
+        ]
+      },
+      "properties": {
+        "name": "松山",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.51711,
+          25.04775
+        ]
+      },
+      "properties": {
+        "name": "台北",
+        "city": "taipei",
+        "type": "tra"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.49996,
+          25.03339
+        ]
+      },
+      "properties": {
+        "name": "萬華",
+        "city": "taipei",
+        "type": "tra"
+      }
+    }
+  ]
+}

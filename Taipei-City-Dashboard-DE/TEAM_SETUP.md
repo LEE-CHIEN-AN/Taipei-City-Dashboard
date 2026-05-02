@@ -76,6 +76,13 @@ python Taipei-City-Dashboard-DE/compute_isochrone_coverage.py
 完成！
 ```
 
+接著設定站點標記圓點圖層（捷運站 / 台鐵站，GeoJSON 已隨 git 附上）：
+
+```powershell
+docker cp Taipei-City-Dashboard-DE/setup_station_markers.sql postgres-manager:/tmp/setup_stations.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_stations.sql
+```
+
 ---
 
 ### 步驟五：匯入人口流量資料
@@ -132,6 +139,9 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 
 docker cp Taipei-City-Dashboard-DE/setup_isochrone_components.sql postgres-manager:/tmp/setup_iso.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_iso.sql
+
+docker cp Taipei-City-Dashboard-DE/setup_station_markers.sql postgres-manager:/tmp/setup_stations.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_stations.sql
 
 docker cp Taipei-City-Dashboard-DE/setup_walkable_components.sql postgres-manager:/tmp/setup_walkable.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_walkable.sql
