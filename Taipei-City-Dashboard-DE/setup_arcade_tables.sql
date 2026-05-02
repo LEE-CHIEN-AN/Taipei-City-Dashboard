@@ -56,3 +56,19 @@ CREATE INDEX IF NOT EXISTS idx_arcade_yearly_dist_year
 
 CREATE INDEX IF NOT EXISTS idx_arcade_yearly_dist_district
     ON public.arcade_yearly_by_district(district);
+
+-- ============================================================
+-- 4. 各行政區人行道總長度（來源：pedestrian_length_by_district.csv）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.pedestrian_length_by_district (
+    id             SERIAL PRIMARY KEY,
+    city           VARCHAR(20)      NOT NULL,
+    district       VARCHAR(20)      NOT NULL,
+    walk_length_m  DOUBLE PRECISION NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_ped_len_city
+    ON public.pedestrian_length_by_district(city);
+
+CREATE INDEX IF NOT EXISTS idx_ped_len_district
+    ON public.pedestrian_length_by_district(district);
