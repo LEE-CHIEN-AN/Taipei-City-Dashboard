@@ -211,36 +211,6 @@ INSERT INTO public.query_charts (
     'taipei'
 );
 
--- city = ntpc：只查新北市
-INSERT INTO public.query_charts (
-    index, history_config, map_config_ids, map_filter,
-    time_from, time_to, update_freq, update_freq_unit,
-    source, short_desc, long_desc, use_case,
-    links, contributors, created_at, updated_at,
-    query_type, query_chart, query_history, city
-) VALUES (
-    'traffic_pedestrian_hourly_taipei',
-    NULL,
-    '{}',
-    '{}',
-    'year_start',
-    'now',
-    1,
-    'year',
-    '內政部警政署',
-    '新北市行人事故依小時與星期幾的分布熱力格。',
-    '以熱力格（HeatmapChart）呈現新北市近三年行人事故在不同時段（0–23時）與不同星期的分布情形。',
-    '識別新北市行人事故高峰時段，協助交通規劃與執法資源配置。',
-    ARRAY['https://data.gov.tw/dataset/13139'],
-    ARRAY['b12705030'],
-    NOW(),
-    NOW(),
-    'three_d',
-    E'SELECT\n    hour::text AS x_axis,\n    CASE EXTRACT(ISODOW FROM make_date(\n        GREATEST(year::int, 2022),\n        GREATEST(month::int, 1),\n        1\n    ))\n        WHEN 1 THEN ''週一''\n        WHEN 2 THEN ''週二''\n        WHEN 3 THEN ''週三''\n        WHEN 4 THEN ''週四''\n        WHEN 5 THEN ''週五''\n        WHEN 6 THEN ''週六''\n        WHEN 7 THEN ''週日''\n    END AS y_axis,\n    COUNT(*)::INT AS data\nFROM traffic_pedestrian_accident_ntpc\nWHERE year >= 2022 AND hour IS NOT NULL AND month IS NOT NULL\nGROUP BY hour, y_axis\nORDER BY hour, y_axis',
-    NULL,
-    'newtaipei'
-);
-
 -- city = metrotaipei：雙北合計
 INSERT INTO public.query_charts (
     index, history_config, map_config_ids, map_filter,
