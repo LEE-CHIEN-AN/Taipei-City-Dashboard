@@ -12,7 +12,7 @@
 | 行人安全地圖 | 雙北行人事故熱區、時段分析、年度趨勢、高風險路口排名、AI 報告 |
 | 大眾運輸步行等時圈 | 捷運／公車／台鐵站 5/10/15 分鐘步行覆蓋等時圈，可點圖例篩選，長條圖疊加顯示 |
 | 人口流量（電信信令） | 雙北各行政區平日日間／夜間活動人數及差異，可捲動長條圖 |
-| 雙北人行道路網圖資 | 地圖交叉比對頁 → 圖資資訊，以金黃色線條顯示 OSM 人行道路網 |
+| 雙北步行路網圖資 | 地圖交叉比對頁 → 圖資資訊，金黃色為人行道、咖啡色為巷弄道路；等時圈以實際路網計算（OSM Dijkstra） |
 
 ---
 
@@ -93,11 +93,11 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/pop_fl
 
 ---
 
-### 步驟六：設定人行道路網圖資組件
+### 步驟六：設定雙北步行路網圖資組件
 
 ```powershell
-docker cp Taipei-City-Dashboard-DE/setup_sidewalk_components.sql postgres-manager:/tmp/setup_sidewalk.sql
-docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_sidewalk.sql
+docker cp Taipei-City-Dashboard-DE/setup_walkable_components.sql postgres-manager:/tmp/setup_walkable.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_walkable.sql
 ```
 
 ---
@@ -133,8 +133,8 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_
 docker cp Taipei-City-Dashboard-DE/setup_isochrone_components.sql postgres-manager:/tmp/setup_iso.sql
 docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_iso.sql
 
-docker cp Taipei-City-Dashboard-DE/setup_sidewalk_components.sql postgres-manager:/tmp/setup_sidewalk.sql
-docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_sidewalk.sql
+docker cp Taipei-City-Dashboard-DE/setup_walkable_components.sql postgres-manager:/tmp/setup_walkable.sql
+docker exec postgres-manager psql -U postgres -d dashboardmanager -f /tmp/setup_walkable.sql
 
 docker restart dashboard-be
 docker restart dashboard-fe
@@ -170,8 +170,8 @@ docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM
 docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.population_flow_daytime;"
 docker exec postgres-data psql -U postgres -d dashboard -c "SELECT COUNT(*) FROM public.population_flow_nighttime;"
 
-# 人行道路網組件
-docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.index, qc.city FROM public.components c JOIN public.query_charts qc ON c.index = qc.index WHERE c.index = 'sidewalk_osm' ORDER BY qc.city;"
+# 步行路網組件
+docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT c.index, qc.city FROM public.components c JOIN public.query_charts qc ON c.index = qc.index WHERE c.index = 'walkable_osm_taipei' ORDER BY qc.city;"
 
 # component_charts 欄位確認（stacked / scrollable）
 docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT index, stacked, scrollable FROM public.component_charts WHERE index LIKE '%isochrone%' OR index LIKE '%population_flow%';"
@@ -183,7 +183,7 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT ind
 - `isochrone_district_coverage`：123 筆（台北 12 區 × 3 交通工具 + 新北 29 區 × 3）
 - `population_flow_daytime`：41 筆
 - `population_flow_nighttime`：41 筆
-- `sidewalk_osm`：應出現 3 列（metrotaipei 兩個、taipei 一個）
+- `walkable_osm_taipei`：應出現 2 列（metrotaipei 一個、taipei 一個）
 - 等時圈 `stacked = t`、人口流量 `scrollable = t`
 
 ---
@@ -212,10 +212,10 @@ docker exec postgres-manager psql -U postgres -d dashboardmanager -c "SELECT ind
 - 確認有跑步驟五（`population_flow_migration.sql`），這個 SQL 會設定 `scrollable = true`
 - 確認有重啟 `dashboard-be`
 
-**Q：人行道路網 toggle 打開後地圖沒有出現金黃色線條？**
-- 確認有執行步驟六（setup_sidewalk_components.sql）
+**Q：步行路網 toggle 打開後地圖沒有出現線條？**
+- 確認有執行步驟六（`setup_walkable_components.sql`）
 - 確認有重啟 `dashboard-fe`（`docker restart dashboard-fe`）
-- 重整後等待約 3–10 秒讓 21 MB GeoJSON 載入完成
+- 重整後等待約 3–10 秒讓 GeoJSON 載入完成
 
 **Q：組件全部顯示問號（?????）或 400 錯誤？**
 - SQL 中文字元損毀（PowerShell 直接 `<` 重導向會亂碼），重新用 `docker cp` 方式重跑對應步驟
